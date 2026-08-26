@@ -262,9 +262,9 @@ class OssnInstallation extends stdClass {
 
 		/**
 		 * Process Data;
-		 * @last edit: $arsalanshah
-		 * @Reason: Initial;
-		 * @return bool;
+		 * [E] Updates the installation db procedure #2631
+		 *
+		 * @return boolean
 		 */
 		public function INSTALL() {
 				if(stripos($this->datadir, $this->ossnInstallationDir()) === 0) {
@@ -292,32 +292,50 @@ class OssnInstallation extends stdClass {
 				unlink($this->datadir . 'writeable');
 
 				try {
-						$this->dbconnect();
+						$db = $this->dbconnect();
 				} catch (Exception $e) {
 						$this->error_mesg = $e->getCode() . ' ' . $e->getMessage();
 						return false;
 				}
-				if($script = file_get_contents(ossn_installation_paths()->root . 'sql/opensource-socialnetwork.sql')) {
-						$script         = str_replace('<<owner_email>>', $this->startup_settings['owner_email'], $script);
-						$script         = str_replace('<<notification_email>>', $this->startup_settings['notification_email'], $script);
-						$script         = str_replace('<<sitename>>', $this->startup_settings['sitename'], $script);
-						$script         = str_replace('<<secret>>', substr(md5('ossn' . bin2hex(random_bytes(6))), 3, 8), $script);
-						$errors         = array();
-						$script         = preg_replace('/\-\-.*\n/', '', $script);
-						$sql_statements = preg_split('/;[\n\r]+/', $script);
 
-						foreach ($sql_statements as $statement) {
-								$statement = trim($statement);
-								if(!empty($statement)) {
+				if($script = file_get_contents(ossn_installation_paths()->root . 'sql/opensource-socialnetwork.sql')) {
+						$script = str_replace('<<owner_email>>', $this->startup_settings['owner_email'], $script);
+						$script = str_replace('<<notification_email>>', $this->startup_settings['notification_email'], $script);
+						$script = str_replace('<<sitename>>', $this->startup_settings['sitename'], $script);
+						$script = str_replace('<<secret>>', substr(md5('ossn' . bin2hex(random_bytes(6))), 3, 8), $script);
+
+						// Remove comments and multi-line comments cleanly
+						$script = preg_replace('!/\*.*?\*/!s', '', $script);
+						$script = preg_replace('/^--.*\n/m', '', $script);
+						$script = preg_replace('/^#.*\n/m', '', $script);
+
+						$errors = array();
+						$lines  = explode("\n", $script);
+						$query  = '';
+
+						// Reconstruct full queries accurately before executing
+						foreach ($lines as $line) {
+								$trimmed = trim($line);
+								if(empty($trimmed) || strpos($trimmed, '--') === 0 || strpos($trimmed, '#') === 0) {
+										continue;
+								}
+
+								$query .= $line . "\n";
+
+								// Execute only when reaching a full statement ending semicolon
+								if(substr($trimmed, -1) === ';') {
 										try {
-												$this->dbconnect()->query($statement);
+												$db->query($query);
 										} catch (Exception $e) {
 												$errors[] = $e->getMessage();
 										}
+										$query = '';
 								}
 						}
+
 						$this->configurations_db();
 						$this->configurations_site();
+
 						if(!empty($errors)) {
 								$errortxt = '';
 								foreach ($errors as $error) {
@@ -328,12 +346,12 @@ class OssnInstallation extends stdClass {
 								throw new Exception($msg);
 						}
 				}
+
 				//[E] Improve installation script #2294
 				//for custom installations scripts
 				$post_install = ossn_installation_paths()->root . 'post_install/';
 				$iterator     = new GlobIterator("{$post_install}post_install*.php", FilesystemIterator::KEY_AS_FILENAME);
 				if($iterator) {
-						//start OSSN engine
 						define('OSSN_ALLOW_SYSTEM_START', true);
 						require_once dirname(dirname(dirname(__FILE__))) . '/system/start.php';
 						foreach ($iterator as $item) {
