@@ -32,10 +32,10 @@ if ($friends) {
                        <span>
                       <?php if ($friends_c > 0) { ?>
                           <span class="ossn-notification-container"><?php echo $friends_c; ?></span>
-                          <div class="ossn-icon ossn-icons-topbar-friends-new"><i class="fa fa-users"></i></div>
+                          <div class="ossn-icon ossn-icons-topbar-friends-new"><?php echo ossn_goblue_lucide_icon('users'); ?></div>
                       <?php } else { ?>
                           <span class="ossn-notification-container d-none"></span>
-                          <div class="ossn-icon ossn-icons-topbar-friends"><i class="fa fa-users"></i></div>
+                          <div class="ossn-icon ossn-icons-topbar-friends"><?php echo ossn_goblue_lucide_icon('users'); ?></div>
                       <?php } ?>
                        </span>
     </a>
@@ -47,10 +47,10 @@ if ($friends) {
                        <span>
                         <?php if ($count_messages > 0) { ?>
                             <span class="ossn-notification-container"><?php echo $count_messages; ?></span>
-                            <div class="ossn-icon ossn-icons-topbar-messages-new"><i class="fa fa-envelope"></i></div>
+                            <div class="ossn-icon ossn-icons-topbar-messages-new"><?php echo ossn_goblue_lucide_icon('mail'); ?></div>
                         <?php } else { ?>
                             <span class="ossn-notification-container d-none"></span>
-                            <div class="ossn-icon ossn-icons-topbar-messages"><i class="fa fa-envelope"></i></div>
+                            <div class="ossn-icon ossn-icons-topbar-messages"><?php echo ossn_goblue_lucide_icon('mail'); ?></div>
                         <?php } ?>
                        </span>
     </a></li>
@@ -60,10 +60,10 @@ if ($friends) {
                        <span>
                        <?php if ($count_notif > 0) { ?>
                            <span class="ossn-notification-container"><?php echo $count_notif; ?></span>
-                           <div class="ossn-icon ossn-icons-topbar-notifications-new"><i class="fa fa-globe-americas"></i></div>
+                           <div class="ossn-icon ossn-icons-topbar-notifications-new"><?php echo ossn_goblue_lucide_icon('globe'); ?></div>
                        <?php } else { ?>
                            <span class="ossn-notification-container d-none"></span>
-                           <div class="ossn-icon ossn-icons-topbar-notification"><i class="fa fa-globe-americas"></i></div>
+                           <div class="ossn-icon ossn-icons-topbar-notification"><?php echo ossn_goblue_lucide_icon('globe'); ?></div>
                        <?php } ?>
                        </span>
     </a>

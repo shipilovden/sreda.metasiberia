@@ -1,8 +1,10 @@
 //<script>
 $(document).ready(function() {
-	$('[data-toggle="tooltip"]').tooltip({
-		placement:'left',										  
-	}); 
+	if ($.fn.tooltip) {
+		$('[data-toggle="tooltip"]').tooltip({
+			placement:'left',
+		});
+	}
 	//hide the comment-like-menu,  can't add code in comment or like as both needs
 	if (Ossn.Config.isLoggedin === false) {
     	$('<style>').prop('type', 'text/css').html('.menu-likes-comments-share { display: none !important; }').appendTo('head');

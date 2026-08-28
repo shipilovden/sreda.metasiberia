@@ -147,9 +147,11 @@ if (OssnChat['allfriends']) {
 					$(".ossn-chat-windows-long .inner").prepend(prependata);
 			}	
 	}
-	$('[data-toggle="tooltip"]').tooltip({
-		placement: 'left',
-	});
+	if ($.fn.tooltip) {
+		$('[data-toggle="tooltip"]').tooltip({
+			placement: 'left',
+		});
+	}
 } else {
 	$('.friends-list-item').remove();	
 	$(".ossn-chat-windows-long .inner").find('.ossn-chat-none').show();	

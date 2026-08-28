@@ -23,7 +23,11 @@
 				'section' => 'newsfeed_user_top_info',
 		));	
 	?>
-        <a class="edit-profile" href="<?php echo ossn_loggedin_user()->profileURL('/edit'); ?>">
-            <?php echo ossn_print('edit:profile'); ?></a>
+        <a class="edit-profile edit-profile-icon"
+           href="<?php echo ossn_loggedin_user()->profileURL('/edit'); ?>"
+           title="<?php echo htmlspecialchars(ossn_print('edit:profile'), ENT_QUOTES, 'UTF-8'); ?>"
+           aria-label="<?php echo htmlspecialchars(ossn_print('edit:profile'), ENT_QUOTES, 'UTF-8'); ?>">
+            <?php echo ossn_goblue_lucide_icon('settings'); ?>
+        </a>
     </div>
 </div>

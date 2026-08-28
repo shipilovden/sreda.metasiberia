@@ -79,7 +79,7 @@ $custom_settings = ossn_goblue_get_custom_logos_bgs_setting();
             	<div class="col-6 col-lg-6 header-dropdown">
 					<ul class="navbar-right">	
                         <div class="dropdown">
-                        	<a id="dLabel" role="button" data-bs-toggle="dropdown" data-bs-target="#"><i class="fa fa-bars fa-3"></i></a> 
+						<a id="dLabel" role="button" data-bs-toggle="dropdown" data-bs-target="#"><?php echo ossn_goblue_lucide_icon('menu'); ?></a>
     						<ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
              					 <li><a class="dropdown-item" href="<?php echo ossn_site_url("action/admin/logout", true);?>"><?php echo ossn_print('admin:logout');?></a></li>
            					 </ul>
@@ -109,8 +109,8 @@ $custom_settings = ossn_goblue_get_custom_logos_bgs_setting();
         		<div class="col-lg-6">
  				<?php echo ossn_print('copyright'); ?> <a href="<?php echo ossn_site_url(); ?>"><?php echo $copyrights; ?></a>            			
            	 	</div>
-                <div class="col-lg-6 text-right">
-                	 <?php echo 'POWERED <a href="http://www.opensource-socialnetwork.org">OPEN SOURCE SOCIAL NETWORK</a>'; ?>
+	                <div class="col-lg-6 text-right">
+	                <?php echo '<a href="' . ossn_site_url() . '">SibCore</a>'; ?>
                 </div>
         	</div>
         </footer>

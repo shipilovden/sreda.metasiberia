@@ -33,7 +33,6 @@ function ossn_sitepages() {
 		}
 		//register menu links in footer
 		$basic = array(
-				'about',
 				'terms',
 				'privacy',
 		);

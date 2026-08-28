@@ -71,30 +71,30 @@ function ossn_wall() {
 
 		$menupost = array(
 				'name' => 'post',
-				'text' => '<i class="fa fa-bullhorn"></i><span>' . ossn_print('post') . '</span>',
+				'text' => ossn_goblue_lucide_icon('megaphone') . '<span>' . ossn_print('post') . '</span>',
 				'href' => ossn_site_url(),
 		);
 		$container_controls = array(
 				array(
 						'name'  => 'tag_friend',
 						'class' => 'ossn-wall-friend',
-						'text'  => '<i class="fa fa-users"></i>',
+						'text'  => ossn_goblue_lucide_icon('users'),
 				),
 				array(
 						'name'  => 'location',
 						'class' => 'ossn-wall-location',
-						'text'  => '<i class="fa fa-map-marker-alt"></i>',
+						'text'  => ossn_goblue_lucide_icon('map-pin'),
 				),
 				array(
 						'name'  => 'photo',
 						'class' => 'ossn-wall-photo',
-						'text'  => '<i class="fa fa-image"></i>',
+						'text'  => ossn_goblue_lucide_icon('image'),
 				),
 		);
 		ossn_register_menu_item('wall/container/controls/group', array(
 				'name'  => 'tag_friend',
 				'class' => 'ossn-wall-friend',
-				'text'  => '<i class="fa fa-users"></i>',
+				'text'  => ossn_goblue_lucide_icon('users'),
 		));
 		ossn_register_menu_item('wall/container/home', $menupost);
 		ossn_register_menu_item('wall/container/group', $menupost);

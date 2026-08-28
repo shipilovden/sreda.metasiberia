@@ -173,6 +173,8 @@ function ossn_ads_newsfeed_sidebar($hook, $type, $return) {
 
 		$return[] = ossn_plugin_view('ads/page/view', array(
 				'ads' => $ads,
+				// Management is available from the admin topbar horn icon.
+				'show_admin_cta' => false,
 		));
 		return $return;
 }

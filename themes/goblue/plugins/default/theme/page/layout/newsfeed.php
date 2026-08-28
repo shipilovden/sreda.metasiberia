@@ -10,11 +10,16 @@
  */
  
 //unused pagebar skeleton when ads are disabled #628 
+$sidebar = '';
+$isempty = '';
 if(ossn_is_hook('newsfeed', "sidebar:right")) {
 	$newsfeed_right = ossn_call_hook('newsfeed', "sidebar:right", NULL, array());
 	$sidebar = implode('', $newsfeed_right);
 	$isempty = trim($sidebar);
 }
+$newsfeed_wall_class = !empty($isempty)
+	? 'col-12 col-lg-8 newsfeed-col-wall'
+	: 'col-12 col-lg-8 newsfeed-col-wall newsfeed-col-wall-centered';
 //show center:top div only when there is something otherwise on phone it results empty div with padding/whitebg.
 if(ossn_is_hook('newsfeed', "center:top")) {
 	$newsfeed_center_top = ossn_call_hook('newsfeed', "center:top", NULL, array());
@@ -26,7 +31,7 @@ if(ossn_is_hook('newsfeed', "center:top")) {
 <div class="container-xl">
 	<div class="ossn-layout-newsfeed">
 		<div class="row">
-			<div class="col-12 col-lg-8 newsfeed-col-wall"> 
+			<div class="<?php echo $newsfeed_wall_class; ?>">
 				<?php if(!empty($isempty_top)){ ?>
 				<div class="newsfeed-middle-top">
 					<?php echo $newsfeed_center_top; ?>
@@ -37,6 +42,7 @@ if(ossn_is_hook('newsfeed', "center:top")) {
 				</div>
 			</div>
 			
+			<?php if(!empty($isempty)){ ?>
 			<div class="col-12 col-lg-4 newsfeed-col-sidebar">
 				<?php if(!empty($isempty)){ ?>
 				<div class="newsfeed-right">
@@ -44,6 +50,7 @@ if(ossn_is_hook('newsfeed', "center:top")) {
 				</div>
 				<?php } ?>
 			</div>
+			<?php } ?>
 		</div>
 	</div>
 	<?php echo ossn_plugin_view('theme/page/elements/footer');?>

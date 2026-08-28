@@ -21,7 +21,7 @@ $ru = array(
 	'create:account' => 'Создать аккаунт',
 	'its:free' => "Это бесплатно и всегда будет",
 		
-	'copyright' => '&copy; Права',
+	'copyright' => '&copy;',
 	'powered' => 'Powered by the Open Source Social Network.',
 	
 	'name' => 'Имя',

@@ -12,7 +12,7 @@
 			<div class="left-side d-inline-block">
 				<div class="topbar-menu-left">
 					<li id="sidebar-toggle" data-toggle='0'>
-						<a role="button" data-bs-target="#"> <i class="fa fa-th-list"></i></a>
+						<a role="button" data-bs-target="#"><?php echo ossn_goblue_lucide_icon('list'); ?></a>
 					</li>
 				</div>
 			</div>
@@ -24,6 +24,15 @@
 			<div class="text-right right-side d-inline-block">
 				<div class="topbar-menu-right">
 					<ul>
+					<?php if(ossn_isAdminLoggedin()){ ?>
+					<li class="ossn-topbar-ads">
+						<a href="<?php echo ossn_site_url('administrator/component/OssnAds'); ?>"
+							 title="<?php echo ossn_print('ads:manager'); ?>"
+							 aria-label="<?php echo ossn_print('ads:manager'); ?>">
+							<?php echo ossn_goblue_lucide_icon('megaphone'); ?>
+						</a>
+					</li>
+					<?php } ?>
 					<li class="ossn-topbar-dropdown-menu">
 						<div class="dropdown">
 						<?php
@@ -32,7 +41,7 @@
 									'role' => 'button',
 									'data-bs-toggle' => 'dropdown',
 									'data-bs-target' => '#',
-									'text' => '<i class="fa fa-sort-down"></i>',
+									'text' => ossn_goblue_lucide_icon('chevron-down'),
 								));									
 								echo ossn_view_menu('topbar_dropdown'); 
 							}

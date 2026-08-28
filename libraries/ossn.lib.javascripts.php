@@ -60,10 +60,9 @@ function ossn_javascript() {
 		ossn_load_external_js('tinymce.min', 'admin');
 
 		ossn_new_external_js('jquery.ui.touch.punch.js', 'vendors/jquery/jquery.ui.touch-punch.107.min.js');
-		if(ossn_get_context() != 'administrator') {
-				ossn_new_external_js('jquery-arhandler-1.1-min.js', 'vendors/jquery/jquery-arhandler-1.1-min.js');
-				ossn_load_external_js('jquery-arhandler-1.1-min.js');
-		}
+		// The OSSN attribution handler requires the original
+		// menu-footer-powered link. This installation uses a custom
+		// SibCore footer, so the handler must not be loaded.
 		//[E] Add fancybox into core as external lib #2234
 		ossn_new_external_js('jquery.fancybox.min.js', 'vendors/fancybox/3.5.7/jquery.fancybox.min.js');
 		ossn_new_external_css('jquery.fancybox.min.css', 'vendors/fancybox/3.5.7/jquery.fancybox.min.css');	

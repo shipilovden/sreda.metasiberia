@@ -479,21 +479,24 @@ and (min-width : 1360px) {
     .ossn-chat-windows-long {
         float: right;
         position: fixed;
-        min-height: 500px;
+        min-height: 0;
         width: 80px;
         border-left: 1px solid #ccc;
         bottom: 0px;
         right: 0;
-        top: 0;
-        background: #E9EAED;
+        top: 48px;
+        background: #1e293b;
         display: block;
+        z-index: 1050;
     }
 
     .ossn-chat-windows-long .inner {
-        margin-top: 55px;
-        border-top: 1px solid #ccc;
+        margin-top: 0;
+        height: calc(100vh - 48px) !important;
+        border-top: 1px solid #334155;
         overflow-x: hidden;
         overflow-y: auto;
+        scrollbar-color: #64748b #1e293b;
     }
 
     .ossn-chat-windows-long .friends-list-item .friends-item-inner {
@@ -502,17 +505,22 @@ and (min-width : 1360px) {
     }
 
     .ossn-chat-windows-long .friends-list-item {
-        border-top: 1px solid #E9EAED;
-        border-bottom: 1px solid #E9EAED;
+        border-top: 1px solid #1e293b;
+        border-bottom: 1px solid #1e293b;
         padding-left: 2px;
             text-align: center;
     }
 
     .ossn-chat-windows-long .friends-list-item:hover {
-        background: #E1E2E5;
-        border-top: 1px solid #ddd;
-        border-bottom: 1px solid #ddd;
+        background: #293850;
+        border-top: 1px solid #334155;
+        border-bottom: 1px solid #334155;
         cursor: pointer;
+    }
+
+    .ossn-chat-windows-long .ossn-chat-none,
+    .ossn-chat-windows-long .ossn-chat-pling {
+        color: #fff;
     }
 
     .ossn-chat-windows-long .friends-list-item .icon {

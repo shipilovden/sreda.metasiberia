@@ -58,7 +58,12 @@ function ossn_initialize() {
 				'text' => ossn_print('copyright') . ' ' . ossn_site_settings('copyrights'),
 				'href' => ossn_site_url(),
 		));
-		ossn_register_menu_item('footer', ossn_pow_lnk_args());
+		ossn_register_menu_item('footer', array(
+				'name'     => 'metasiberia_social',
+				'text'     => 'SibCore',
+				'href'     => ossn_site_url(),
+				'priority' => 1000,
+		));
 		ossn_extend_view('ossn/endpoint', 'author/view');
 }
 

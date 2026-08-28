@@ -22,6 +22,6 @@ if($ads) {
 		}
 		echo implode('', $items);
 		echo '</div>';
-} elseif(ossn_isAdminLoggedin()) {
+} elseif(ossn_isAdminLoggedin() && (!isset($params['show_admin_cta']) || $params['show_admin_cta'])) {
 		echo ossn_plugin_view('ads/admin_create_sidebar');
 }

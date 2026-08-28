@@ -1,7 +1,7 @@
 <nav class="navbar navbar-expand-lg navbar-default navbar-admin-second" role="navigation">
     <div class="container">
    			 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" >
-     			 <i class="fa fa-bars"></i>
+				 <?php echo ossn_goblue_lucide_icon('menu'); ?>
    			 </button>
         		<div class="collapse navbar-collapse" id="navbarNav">
             		<ul class="nav navbar-nav">

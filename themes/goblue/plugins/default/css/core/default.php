@@ -419,17 +419,21 @@ a {
 		flex: 0 0 37.5%; 
 		max-width: 37.5%;
 	}
+	.newsfeed-col-wall-centered {
+		margin-left: auto;
+		margin-right: auto;
+	}
 }
 /*******************************
 	Topbar	
 ********************************/
 
 .topbar {
-	background: #0b769c;
+	background: #1e293b;
 	color: #fff;
 	z-index: 1;
 	position: fixed;
-	height: 55px;
+	height: 48px;
 	width:100%;
 	z-index: 1051;
 	
@@ -454,7 +458,7 @@ a {
 }
 /** inner page padding because of topbar fixed **/
 :not(:has(.topbar.position-relative)) .ossn-inner-page {
-    margin-top: 70px;
+    margin-top: 60px;
 }
 .topbar .fa {
 	font-size: 20px;
@@ -462,9 +466,9 @@ a {
 }
 
 .topbar .site-name a {
-	text-transform: uppercase;
+	text-transform: none;
 	font-size: 20px;
-	padding: 10px;
+	padding: 8px;
 	color: #fff;
 	display: block;
 	font-weight: bold;
@@ -490,7 +494,7 @@ a {
 
 .topbar-menu-right li a:not(.topbar-menu-right li .dropdown-item),
 .topbar-menu-left li a {
-	padding: 13px 10px;
+	padding: 8px 6px;
 	display: block;
 	color: #fff;
 }
@@ -499,6 +503,25 @@ a {
 .topbar-menu-left li:hover {
 	cursor: pointer;
 	background-color: #0a6586;
+}
+
+.ossn-lucide-icon {
+	display: inline-block;
+	width: 1.35em;
+	height: 1.35em;
+	vertical-align: middle;
+	color: inherit;
+}
+
+.topbar .ossn-lucide-icon,
+.navbar-admin-second .ossn-lucide-icon,
+.header-dropdown .ossn-lucide-icon {
+	width: 20px;
+	height: 20px;
+}
+
+.topbar .ossn-lucide-icon {
+	color: #fff !important;
 }
 
 .topbar .right-side-nospace .topbar-menu-right {
@@ -519,13 +542,13 @@ a {
 
 .topbar .ossn-icons-topbar-friends,
 .topbar .ossn-icons-topbar-messages,
-.topbar .ossn-icons-topbar-notification i {
-	color: #0f3b4a;
+.topbar .ossn-icons-topbar-notification {
+	color: #fff;
 }
 
 .topbar .ossn-icons-topbar-friends-new,
 .topbar .ossn-icons-topbar-messages-new,
-.topbar .ossn-icons-topbar-notifications-new i {
+.topbar .ossn-icons-topbar-notifications-new {
 	color: #fff;
 }
 
@@ -624,6 +647,19 @@ a {
 
 	scrollbar-width: thin;
 	scrollbar-color: #64748b #1e293b;
+}
+
+.sidebar,
+.sidebar * {
+	border-radius: 0 !important;
+}
+
+.sidebar .ossn-search input[type="text"] {
+	border-radius: 0 !important;
+}
+
+.sidebar .newseed-uinfo .user-icon-small {
+	border-radius: 50% !important;
 }
 
 .sidebar::-webkit-scrollbar {
@@ -748,6 +784,21 @@ a {
 	transition: color 0.2s ease;
 }
 
+.edit-profile-icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 28px;
+	height: 28px;
+	color: #fff !important;
+}
+
+.edit-profile-icon .ossn-lucide-icon {
+	width: 20px;
+	height: 20px;
+	color: #fff !important;
+}
+
 .edit-profile:hover {
 	color: #ffffff !important;
 }
@@ -789,13 +840,13 @@ a {
 .sidebar .sub-menu li {}
 
 .sidebar .sidebar-parent-item-main[aria-expanded="true"] a {
-	color: #000;
+	color: #fff !important;
 }
 
 .sidebar .sidebar-parent-item-main[aria-expanded="true"] {
-	background: #fff;
+	background: #293850;
 	padding: 10px;
-	border-radius: 10px;
+	border-radius: 0;
 }
 
 .sidebar-menu-nav ul:not(collapsed) .arrow:before,
@@ -1697,6 +1748,40 @@ footer .ossn-footer-menu a:last-child::after {
 	text-transform: uppercase;
 }
 
+@media only screen and (min-width: 1360px) {
+	/* Keep the newsfeed footer visible while the feed scrolls underneath it. */
+	.ossn-layout-newsfeed {
+		padding-bottom: 32px;
+	}
+
+	.ossn-layout-newsfeed + footer {
+		position: fixed;
+		left: 0;
+		right: 80px;
+		bottom: 0;
+		z-index: 1040;
+		box-sizing: border-box;
+		height: 32px;
+		min-height: 32px;
+		margin: 0;
+		padding: 5px 20px;
+		background: #eaeaea;
+		border-top: 1px solid #d2d2d2;
+	}
+
+	.sidebar-open-page-container .ossn-layout-newsfeed + footer,
+	.sidebar-open-page-container-no-annimation .ossn-layout-newsfeed + footer {
+		left: var(--layout-sidebar-width);
+	}
+
+	.ossn-layout-newsfeed + footer .footer-contents,
+	.ossn-layout-newsfeed + footer .ossn-footer-menu {
+		line-height: 20px;
+		padding-bottom: 0;
+		text-align: right;
+	}
+}
+
 
 /****************************
 	Home
@@ -2410,9 +2495,7 @@ label {
 	left: 0;
 	right: 0;
 	bottom: 0;
-	background:
-		radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.15) 0%, transparent 50%),
-		radial-gradient(circle at 80% 80%, rgba(0, 0, 0, 0.1) 0%, transparent 50%);
+	background: none;
 	pointer-events: none;
 }
 
