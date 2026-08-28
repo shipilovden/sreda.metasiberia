@@ -46,7 +46,9 @@ $image = ossn_profile_coverphoto_wall_url($image);
                 <img src="<?php echo $image; ?>"/>
     	</div>
 	<?php
+		ossn_wall_register_repost_entity_menu($params['post']);
 		$vars['entity'] = ossn_get_entity($params['post']->item_guid);
+		$vars['ossn_wall_stable_actions'] = true;
 		echo ossn_plugin_view('entity/comment/like/share/view', $vars);
 	?>    
 	</div>

@@ -29,5 +29,14 @@ $en = array(
 		'ossn:wall:post:saved'          => 'Post successfully saved',
 		'ossn:wall:post:save:error'     => 'Can not save post',
 		'ossn:wall:tag:member'          => 'Tag Member',
+		'repost:post'                   => 'Repost',
+		'repost:from'                   => 'Reposted from',
+		'repost:success'                => 'The post was reposted to your feed.',
+		'repost:error'                  => 'The post could not be reposted. Please try again later.',
+		'repost:quote:title'            => 'Repost with quote',
+		'repost:quote'                  => 'Repost with quote',
+		'repost:quote:hint'             => 'Add your own text to this post.',
+		'repost:quote:success'          => 'The quote was published to your feed.',
+		'repost:quote:error'            => 'The quote could not be published. Please try again later.',
 );
 ossn_register_languages('en', $en);

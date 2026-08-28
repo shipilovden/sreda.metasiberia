@@ -29,6 +29,15 @@ $ru = array(
 		'ossn:wall:post:saved' => 'Запись сохранена',
 		'ossn:wall:post:save:error' => 'Нельзя сохранить запись',
 		'ossn:wall:tag:member'  => 'Участник тега',
+		'repost:post' => 'Репост',
+		'repost:from' => 'Репост от',
+		'repost:success' => 'Запись опубликована в вашей ленте.',
+		'repost:error' => 'Не удалось сделать репост. Попробуйте позже.',
+		'repost:quote:title' => 'Репост с цитатой',
+		'repost:quote' => 'Репост с цитатой',
+		'repost:quote:hint' => 'Добавьте свой текст к этой записи.',
+		'repost:quote:success' => 'Цитата опубликована в вашей ленте.',
+		'repost:quote:error' => 'Не удалось опубликовать цитату. Попробуйте позже.',
 
 );
 ossn_register_languages('ru', $ru);

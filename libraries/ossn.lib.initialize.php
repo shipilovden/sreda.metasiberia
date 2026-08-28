@@ -60,7 +60,7 @@ function ossn_initialize() {
 		));
 		ossn_register_menu_item('footer', array(
 				'name'     => 'metasiberia_social',
-				'text'     => 'SibCore',
+				'text'     => 'SREDA',
 				'href'     => ossn_site_url(),
 				'priority' => 1000,
 		));

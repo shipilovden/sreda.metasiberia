@@ -27,6 +27,8 @@ function ossn_wall() {
 				ossn_register_action('wall/post/delete', __OSSN_WALL__ . 'actions/wall/post/delete.php');
 				ossn_register_action('wall/post/edit', __OSSN_WALL__ . 'actions/wall/post/edit.php');
 				ossn_register_action('wall/post/embed', __OSSN_WALL__ . 'actions/wall/post/embed.php');
+				ossn_register_action('wall/repost', __OSSN_WALL__ . 'actions/wall/repost.php');
+				ossn_register_action('wall/quote', __OSSN_WALL__ . 'actions/wall/quote.php');
 
 				ossn_extend_view('forms/OssnWall/home/container', 'ossn_wall_container_assets');
 				ossn_extend_view('forms/OssnWall/user/container', 'ossn_wall_container_assets');
@@ -38,6 +40,8 @@ function ossn_wall() {
 		//css and js
 		ossn_extend_view('css/ossn.default', 'css/wall');
 		ossn_extend_view('js/ossn.site', 'js/ossn_wall');
+		ossn_new_js('ossn.repost', 'js/ossn_repost');
+		ossn_load_js('ossn.repost');
 
 		ossn_new_external_js('jquery.tokeninput', 'vendors/jquery/jquery.tokeninput.js');
 
@@ -389,8 +393,38 @@ function ossn_post_page($pages) {
 								),
 								'callback' => '#ossn-post-edit-save',
 						);
-						echo ossn_plugin_view('output/ossnbox', $params);
+					echo ossn_plugin_view('output/ossnbox', $params);
 				}
+				break;
+		case 'quote':
+				if(!ossn_is_xhr() || !ossn_isLoggedin()) {
+						ossn_error_page();
+						break;
+				}
+				$wall = new OssnWall();
+				$post = $wall->GetPost($pages[1]);
+				if(!$post || !ossn_wall_repost_source_visible($post)) {
+						header('HTTP/1.0 404 Not Found');
+						break;
+				}
+				$params = array(
+						'title'    => ossn_print('repost:quote:title'),
+						'contents' => ossn_view_form(
+								'post/quote',
+								array(
+										'action'    => ossn_site_url('action/wall/quote'),
+										'id'        => 'ossn-wall-quote-form',
+										'component' => 'OssnWall',
+										'params'    => array(
+												'post' => $post,
+										),
+								),
+								false
+						),
+						'callback' => '#ossn-wall-quote-save',
+						'button'   => ossn_print('repost:quote'),
+				);
+				echo ossn_plugin_view('output/ossnbox', $params);
 				break;
 		default:
 				ossn_error_page();
@@ -447,6 +481,306 @@ function ossn_wall_post_menu($hook, $type, $return, $params) {
 		}
 		return ossn_view_menu('wallpost', 'wall/menus/post-controls');
 }
+/**
+ * Check whether a wall publication is visible to a user and can be used as
+ * the source of a repost.
+ *
+ * @param object $post Wall publication.
+ * @param object|false $user User to check, or the current user.
+ *
+ * @return bool
+ */
+function ossn_wall_repost_source_visible($post, $user = false) {
+		if(!$post || !in_array($post->type, array('user', 'group'), true) || !ossn_wall_repost_source_supported($post)) {
+				return false;
+		}
+
+		if(!$user) {
+				$user = ossn_loggedin_user();
+		}
+		$user_guid = $user && !empty($user->guid) ? (int) $user->guid : 0;
+		$is_post_owner = $user_guid && ((int) $post->poster_guid === $user_guid || (int) $post->owner_guid === $user_guid);
+
+		if($post->type === 'user') {
+				if((int) $post->access === OSSN_PUBLIC) {
+						return true;
+				}
+				if(!$user_guid) {
+						return false;
+				}
+				if($is_post_owner || ossn_isAdminLoggedin()) {
+						return true;
+				}
+				return (int) $post->access === OSSN_FRIENDS && ossn_user_is_friend($post->owner_guid, $user_guid);
+		}
+
+		if(!$user_guid || !function_exists('ossn_get_group_by_guid')) {
+				return false;
+		}
+		$group = ossn_get_group_by_guid($post->owner_guid);
+		return $group && ($group->owner_guid == $user_guid || $post->poster_guid == $user_guid || $group->isMember($group->guid, $user_guid) || ossn_isAdminLoggedin());
+}
+
+/**
+ * Check whether a wall publication has a representation that can be reposted.
+ *
+ * OSSN stores profile/cover/photo-album updates as wall objects with an
+ * item_guid instead of regular post text. These are still publications in the
+ * feed and are supported by the repost preview below.
+ *
+ * @param object $post Wall publication.
+ *
+ * @return bool
+ */
+function ossn_wall_repost_source_supported($post) {
+		if(!$post || !in_array($post->type, array('user', 'group'), true)) {
+				return false;
+		}
+		if(empty($post->item_guid)) {
+				return true;
+		}
+		return in_array($post->item_type, array('profile:photo', 'cover:photo', 'album:photos:wall'), true);
+}
+
+/**
+ * Get an image used by a supported special wall publication.
+ *
+ * @param object $post Wall publication.
+ *
+ * @return string
+ */
+function ossn_wall_repost_source_image($post) {
+		if(!$post) {
+				return '';
+		}
+		if(isset($post->{'file:wallphoto'})) {
+				return $post->getPhotoURL();
+		}
+
+		if($post->item_type === 'profile:photo' && function_exists('ossn_profile_photo_wall_url')) {
+				$image = ossn_get_file($post->item_guid);
+				return $image ? ossn_profile_photo_wall_url($image) : '';
+		}
+		if($post->item_type === 'cover:photo' && function_exists('ossn_profile_coverphoto_wall_url')) {
+				$image = ossn_get_file($post->item_guid);
+				return $image ? ossn_profile_coverphoto_wall_url($image) : '';
+		}
+		if($post->item_type === 'album:photos:wall' && !empty($post->photos_guids) && class_exists('OssnPhotos')) {
+				$photo_guids = array_filter(array_map('intval', explode(',', $post->photos_guids)));
+				if(!empty($photo_guids)) {
+						$photos = (new OssnPhotos())->searchPhotos(array(
+								'wheres' => 'e.guid IN(' . implode(',', $photo_guids) . ')',
+								'page_limit' => 1,
+						));
+						if(!empty($photos[0])) {
+								return $photos[0]->getURL('view');
+						}
+				}
+		}
+		return '';
+}
+
+/**
+ * Resolve and validate the original publication used by a repost.
+ *
+ * @param integer $guid Publication guid.
+ * @param object|false $user User that requests the repost.
+ *
+ * @return object|false
+ */
+function ossn_wall_repost_source($guid, $user = false) {
+		$wall = new OssnWall();
+		$source = !empty($guid) ? $wall->GetPost((int) $guid) : false;
+		if(!$source) {
+				return false;
+		}
+
+		// Reposting a repost always points to its original publication.
+		if(!empty($source->repost_guid)) {
+				$original = $wall->GetPost((int) $source->repost_guid);
+				if($original) {
+						$source = $original;
+				}
+		}
+
+		return ossn_wall_repost_source_visible($source, $user) ? $source : false;
+}
+
+/**
+ * Render the repost toggle used in a wall action row.
+ *
+ * @param object $post Wall publication.
+ *
+ * @return string
+ */
+function ossn_wall_repost_toggle($post) {
+		if(!ossn_isLoggedin() || !$post || empty($post->guid) || !ossn_wall_repost_source_visible($post)) {
+				return '';
+		}
+		$guid = (int) $post->guid;
+		return '<a href="javascript:void(0);" class="post-control-repost ossn-wall-post-repost ossn-wall-repost-toggle" data-guid="' . $guid . '" aria-haspopup="true" aria-expanded="false" aria-label="' . htmlspecialchars(ossn_print('repost:post'), ENT_QUOTES, 'UTF-8') . '">' . ossn_goblue_lucide_icon('repeat-2') . '<span>' . ossn_print('repost:post') . '</span></a>';
+}
+
+/**
+ * Render the two repost choices shown after clicking the repost toggle.
+ *
+ * @param integer $guid Publication guid.
+ *
+ * @return string
+ */
+function ossn_wall_repost_menu_markup($guid) {
+		$guid = (int) $guid;
+		return '<div class="ossn-wall-repost-menu" role="menu" hidden>'
+				. '<a href="javascript:void(0);" class="ossn-wall-repost-action" data-mode="repost" data-guid="' . $guid . '" role="menuitem">'
+				. ossn_goblue_lucide_icon('repeat-2') . '<span>' . ossn_print('repost:post') . '</span></a>'
+				. '<a href="javascript:void(0);" class="ossn-wall-repost-action" data-mode="quote" data-guid="' . $guid . '" role="menuitem">'
+				. ossn_goblue_lucide_icon('quote') . '<span>' . ossn_print('repost:quote') . '</span></a>'
+				. '</div>';
+}
+
+/**
+ * Render a repost action with its menu for wall templates that do not use
+ * postextra (for example photo wall updates).
+ *
+ * @param object $post Wall publication.
+ *
+ * @return string
+ */
+function ossn_wall_repost_button($post) {
+		$toggle = ossn_wall_repost_toggle($post);
+		if(empty($toggle)) {
+				return '';
+		}
+		return '<div class="ossn-wall-repost-dropdown">' . $toggle . ossn_wall_repost_menu_markup($post->guid) . '</div>';
+}
+
+/**
+ * Render one existing postextra menu item without relying on its registration
+ * priority. This keeps the action row order stable for every wall item.
+ *
+ * @param array $link Existing OSSN menu item.
+ *
+ * @return string
+ */
+function ossn_wall_render_post_menu_link($link) {
+		if(empty($link['name'])) {
+				return '';
+		}
+		$name = $link['name'];
+		$class = 'post-control-' . $name;
+		if(isset($link['class'])) {
+				$class .= ' ' . $link['class'];
+		}
+		$link['class'] = $class;
+		unset($link['name'], $link['priority']);
+		return '<li>' . ossn_plugin_view('output/url', $link) . '</li>';
+}
+
+/**
+ * Render the common wall action row in the order Like, Comment, Repost.
+ *
+ * @param object $post Wall publication.
+ *
+ * @return string
+ */
+function ossn_wall_render_post_actions($post) {
+		global $Ossn;
+		if(!ossn_isLoggedin() || empty($Ossn->menu['postextra'])) {
+				return '';
+		}
+
+		$items = array();
+		foreach($Ossn->menu['postextra'] as $menu) {
+				foreach($menu as $link) {
+						if(!empty($link['name']) && in_array($link['name'], array('like', 'comment'), true)) {
+							$items[$link['name']] = $link;
+						}
+				}
+		}
+
+		$html = '';
+		foreach(array('like', 'comment') as $name) {
+				if(isset($items[$name])) {
+						$html .= ossn_wall_render_post_menu_link($items[$name]);
+				}
+		}
+
+		$repost = ossn_wall_repost_button($post);
+		if($repost) {
+				$html .= '<li class="ossn-wall-repost-action-item">' . $repost . '</li>';
+		}
+		return $html;
+}
+
+/**
+ * Render the entity action row in the same order as a regular wall post.
+ *
+ * Profile, cover and album updates use entityextra instead of postextra.
+ * Keep the existing entity handlers, but render their three common actions
+ * in one predictable order and attach the same repost menu.
+ *
+ * @return string
+ */
+function ossn_wall_render_entity_actions() {
+		global $Ossn;
+		if(!ossn_isLoggedin() || empty($Ossn->menu['entityextra'])) {
+				return '';
+		}
+
+		$items = array();
+		foreach($Ossn->menu['entityextra'] as $menu) {
+				foreach($menu as $link) {
+						if(!empty($link['name']) && in_array($link['name'], array('like', 'comment', 'repost'), true)) {
+							$items[$link['name']] = $link;
+						}
+				}
+		}
+
+		$html = '';
+		foreach(array('like', 'comment', 'repost') as $name) {
+				if(!isset($items[$name])) {
+						continue;
+				}
+				$link = $items[$name];
+				$class = 'entity-menu-extra-' . $name;
+				if(isset($link['class'])) {
+						$class .= ' ' . $link['class'];
+				}
+				$link['class'] = $class;
+				unset($link['name'], $link['priority']);
+
+				$action = ossn_plugin_view('output/url', $link);
+				if($name === 'repost' && !empty($link['data-guid'])) {
+						$action = '<div class="ossn-wall-repost-dropdown">' . $action . ossn_wall_repost_menu_markup($link['data-guid']) . '</div>';
+				}
+				$html .= '<li>' . $action . '</li>';
+		}
+		return $html;
+}
+
+/**
+ * Register a repost action in the entity menu used by special wall templates.
+ *
+ * @param object $post Wall publication.
+ *
+ * @return void
+ */
+function ossn_wall_register_repost_entity_menu($post) {
+		ossn_unregister_menu('repost', 'entityextra');
+		if(!ossn_isLoggedin() || !$post || empty($post->guid) || !ossn_wall_repost_source_visible($post)) {
+				return;
+		}
+		$guid = (int) $post->guid;
+		ossn_register_menu_item('entityextra', array(
+				'name'      => 'repost',
+				'class'     => 'ossn-wall-post-repost ossn-wall-repost-toggle',
+				'href'      => 'javascript:void(0);',
+				'data-guid' => $guid,
+				'priority'  => 210,
+				'text'      => ossn_goblue_lucide_icon('repeat-2') . '<span>' . ossn_print('repost:post') . '</span>',
+		));
+}
+
 /**
  * Delete group wall posts
  *
@@ -612,31 +946,44 @@ function ossn_get_homepage_wall_access() {
  */
 function ossn_wallpost_to_item($post) {
 		if($post && $post instanceof OssnWall) {
+				$content_post = $post;
+				$reposted_post = false;
+				if(!empty($post->repost_guid)) {
+						$reposted_post = (new OssnWall())->GetPost((int) $post->repost_guid);
+						if($reposted_post && ossn_wall_repost_source_visible($reposted_post)) {
+								$content_post = $reposted_post;
+						} else {
+								$reposted_post = false;
+						}
+				}
+
 				//post text
 				$text = '';
-				if(!empty($post->description)) {
-						$text = ossn_restore_new_lines($post->description, true);
+				if(!empty($content_post->description)) {
+						$text = ossn_restore_new_lines($content_post->description, true);
+				}
+				// A quoted repost keeps the new author's text on the repost object,
+				// while the rest of the rendered content comes from the source post.
+				$repost_text = '';
+				if($reposted_post && !empty($post->description)) {
+						$repost_text = ossn_restore_new_lines($post->description, true);
 				}
 
 				//location
 				$location = '';
-				if(isset($post->location)) {
-						$location = '- ' . $post->location;
+				if(isset($content_post->location)) {
+						$location = '- ' . $content_post->location;
 				}
 
 				//image
-				if(isset($post->{'file:wallphoto'})) {
-						$image = $post->getPhotoURL();
-				} else {
-						$image = '';
-				}
+				$image = ossn_wall_repost_source_image($content_post);
 
 				$user = ossn_user_by_guid($post->poster_guid);
 
 				//friends
 				$friends = '';
-				if(isset($post->tag_friend_guids)) {
-						$friends = $post->tag_friend_guids;
+				if(isset($content_post->tag_friend_guids)) {
+						$friends = $content_post->tag_friend_guids;
 				}
 
 				return array(
@@ -646,6 +993,8 @@ function ossn_wallpost_to_item($post) {
 						'location' => $location,
 						'user'     => $user,
 						'image'    => $image,
+						'repost_text' => $repost_text,
+						'reposted_post' => $reposted_post,
 				);
 		}
 		return false;

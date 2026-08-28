@@ -68,6 +68,20 @@ if ($params['user']->guid !== $params['post']->owner_guid) {
 			</div>
 		</div>
 		<div class="post-contents">
+			<?php
+			if(!empty($params['reposted_post'])) {
+					$reposted_user = ossn_user_by_guid($params['reposted_post']->poster_guid);
+					if($reposted_user) {
+							$reposted_user_link = ossn_plugin_view('output/user/url', array(
+									'user' => $reposted_user,
+								));
+							echo '<div class="ossn-wall-repost-label">' . ossn_goblue_lucide_icon('repeat-2') . '<span>' . ossn_print('repost:from') . ' ' . $reposted_user_link . '</span></div>';
+					}
+			}
+			if(!empty($params['repost_text'])) {
+					echo '<p class="ossn-wall-repost-quote">' . $params['repost_text'] . '</p>';
+			}
+			?>
 			<p><?php echo $params['text']; ?></p>
 			 <?php
 				if(!empty($params['friends'])){
@@ -102,10 +116,10 @@ if ($params['user']->guid !== $params['post']->owner_guid) {
       		  	if(ossn_is_hook('post', 'likes')) {
           			 echo ossn_call_hook('post', 'likes', $params['post']);
         		}
-      		  ?>     
+				?>
             </div>
 			<div class="menu-likes-comments-share">
-				<?php echo ossn_view_menu('postextra', 'wall/menus/postextra');?>
+				<?php echo ossn_wall_render_post_actions($params['post']);?>
 			</div>
 			<div class="comments-list">
               <?php

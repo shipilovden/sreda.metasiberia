@@ -24,7 +24,13 @@
     ?>  
     </div>
 	<div class="menu-likes-comments-share">
-            	<?php echo ossn_view_menu('entityextra');?>
+			<?php
+			if(!empty($params['ossn_wall_stable_actions']) && function_exists('ossn_wall_render_entity_actions')) {
+				echo ossn_wall_render_entity_actions();
+			} else {
+				echo ossn_view_menu('entityextra');
+			}
+			?>
 	</div>     
     <div class="comments-list">
     <?php

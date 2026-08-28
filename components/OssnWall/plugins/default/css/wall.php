@@ -350,6 +350,116 @@
 	content: "\f2ed" !important;
 }
 
+.ossn-wall-item .post-control-repost {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+}
+
+.ossn-wall-item .post-control-repost .ossn-lucide-icon {
+	    width: 1.35em;
+	    height: 1.35em;
+	    vertical-align: -0.2em;
+}
+
+.ossn-wall-item .post-control-repost.ossn-repost-in-xhr {
+	opacity: 0.5;
+	pointer-events: none;
+}
+
+/* Repost menu: one predictable action in every wall row, with two real modes. */
+.ossn-wall-item .ossn-wall-repost-dropdown {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	height: 40px;
+	z-index: 10;
+}
+
+.ossn-wall-item .ossn-wall-repost-toggle {
+	position: relative;
+}
+
+.ossn-wall-item .ossn-wall-repost-menu {
+	display: none;
+	position: absolute;
+	left: 50%;
+	bottom: calc(100% + 6px);
+	transform: translateX(-50%);
+	min-width: 170px;
+	padding: 4px;
+	background: #fff;
+	border: 1px solid #d6dce5;
+	box-shadow: 0 5px 18px rgba(15, 23, 42, 0.2);
+	z-index: 100;
+}
+
+.ossn-wall-item .ossn-wall-repost-menu[hidden] {
+	display: none !important;
+}
+
+.ossn-wall-item .ossn-wall-repost-dropdown.is-open .ossn-wall-repost-menu {
+	display: flex;
+	flex-direction: column;
+}
+
+.ossn-wall-item .ossn-wall-repost-menu a {
+	display: flex !important;
+	align-items: center !important;
+	justify-content: flex-start !important;
+	gap: 9px !important;
+	width: auto !important;
+	height: auto !important;
+	min-height: 36px;
+	padding: 8px 11px !important;
+	color: #27364a !important;
+	font-size: 14px;
+	font-weight: 600;
+	white-space: nowrap;
+	text-align: left;
+}
+
+.ossn-wall-item .ossn-wall-repost-menu a::before {
+	display: none !important;
+	content: none !important;
+}
+
+.ossn-wall-item .ossn-wall-repost-menu a:hover {
+	background: #eef3f8 !important;
+}
+
+.ossn-wall-item .ossn-wall-repost-menu .ossn-lucide-icon {
+	width: 18px;
+	height: 18px;
+	flex: 0 0 18px;
+}
+
+/* Entity menus render anchors without the wall template's <li> wrapper. */
+.ossn-wall-item .menu-likes-comments-share > .ossn-wall-repost-dropdown {
+	flex: 1;
+}
+
+.ossn-wall-repost-label {
+	display: flex;
+	align-items: center;
+	gap: 5px;
+	margin-bottom: 8px;
+	color: #777;
+	font-size: 13px;
+}
+
+.ossn-wall-repost-label .ossn-lucide-icon {
+	width: 1em;
+	height: 1em;
+}
+
+.ossn-wall-repost-quote {
+	margin: 0 0 10px;
+	font-weight: 500;
+}
+
 .ossn-wall-textarea {
 	min-height: 200px;
 	outline: none;

@@ -110,7 +110,7 @@ $custom_settings = ossn_goblue_get_custom_logos_bgs_setting();
  				<?php echo ossn_print('copyright'); ?> <a href="<?php echo ossn_site_url(); ?>"><?php echo $copyrights; ?></a>            			
            	 	</div>
 	                <div class="col-lg-6 text-right">
-	                <?php echo '<a href="' . ossn_site_url() . '">SibCore</a>'; ?>
+	                <?php echo '<a href="' . ossn_site_url() . '">SREDA</a>'; ?>
                 </div>
         	</div>
         </footer>

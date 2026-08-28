@@ -40,7 +40,7 @@ if($total == 1) {
                			echo ossn_call_hook('wall', 'post:menu', $menu);
             			}
             		?>   
-				</div>
+			</div>
 			</div>
 			<div class="user">
            <?php if ($params['user']->guid == $params['post']->owner_guid) { ?>
@@ -97,6 +97,11 @@ if($total == 1) {
 								echo $view;
 					}
 				?>
-    	</div>      
+		</div>
+		<?php if($actions = ossn_wall_render_post_actions($params['post'])) { ?>
+			<div class="comments-likes ossn-wall-special-post-actions">
+				<div class="menu-likes-comments-share"><?php echo $actions; ?></div>
+			</div>
+		<?php } ?>
 	</div>
 </div>
