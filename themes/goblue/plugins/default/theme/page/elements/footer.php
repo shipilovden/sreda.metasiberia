@@ -1,4 +1,4 @@
-<footer>
+<footer class="sibcore-site-footer">
         <div class="footer-contents">
             <div class="ossn-footer-menu">
                 <?php echo ossn_view_menu('footer'); ?>

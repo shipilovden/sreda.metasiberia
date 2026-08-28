@@ -58,8 +58,8 @@ function goblue_search_bar_sidebar(){
 		), false);	
 }
 function theme_meta_favicon() {
-		$icon = ossn_add_cache_to_url(ossn_theme_url() . 'images/favicon.ico');
-		return "\r\n<link rel='icon' href='{$icon}' type='image/x-icon' />";
+		$icon = ossn_add_cache_to_url(ossn_theme_url() . 'images/favicon.svg');
+		return "\r\n<link rel='icon' href='{$icon}' type='image/svg+xml' />";
 }
 /**
  * Render a local Lucide icon.

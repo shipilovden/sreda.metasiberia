@@ -1749,12 +1749,12 @@ footer .ossn-footer-menu a:last-child::after {
 }
 
 @media only screen and (min-width: 1360px) {
-	/* Keep the newsfeed footer visible while the feed scrolls underneath it. */
-	.ossn-layout-newsfeed {
+	/* Keep the shared footer visible while authenticated pages scroll underneath it. */
+	.opensource-socalnetwork:has(.sidebar) .ossn-inner-page {
 		padding-bottom: 32px;
 	}
 
-	.ossn-layout-newsfeed + footer {
+	.opensource-socalnetwork:has(.sidebar) .sibcore-site-footer {
 		position: fixed;
 		left: 0;
 		right: 80px;
@@ -1769,13 +1769,13 @@ footer .ossn-footer-menu a:last-child::after {
 		border-top: 1px solid #d2d2d2;
 	}
 
-	.sidebar-open-page-container .ossn-layout-newsfeed + footer,
-	.sidebar-open-page-container-no-annimation .ossn-layout-newsfeed + footer {
+	.sidebar-open-page-container .sibcore-site-footer,
+	.sidebar-open-page-container-no-annimation .sibcore-site-footer {
 		left: var(--layout-sidebar-width);
 	}
 
-	.ossn-layout-newsfeed + footer .footer-contents,
-	.ossn-layout-newsfeed + footer .ossn-footer-menu {
+	.sibcore-site-footer .footer-contents,
+	.sibcore-site-footer .ossn-footer-menu {
 		line-height: 20px;
 		padding-bottom: 0;
 		text-align: right;
