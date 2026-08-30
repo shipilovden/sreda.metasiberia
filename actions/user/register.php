@@ -19,6 +19,12 @@ $user['email'] = input('email');
 $user['reemail'] = input('email_re');
 $user['password'] = input('password');
 
+$selected_language = input('language');
+$signup_language = '';
+if (is_string($selected_language) && in_array($selected_language, ossn_get_available_languages(), true)) {
+	$signup_language = $selected_language;
+}
+
 $fields = ossn_user_fields_names();
 if($fields && isset($fields['required'])) {
 		foreach($fields['required'] as $field){
@@ -96,7 +102,15 @@ if(!$add->isEmail()){
     echo json_encode($em);
     exit;		
 }
-if ($add->addUser()) {
+$guid = $add->addUser();
+if ($guid) {
+	if ($signup_language !== '') {
+		$registered_user = ossn_user_by_guid($guid);
+		if ($registered_user) {
+			$registered_user->data->language = $signup_language;
+			$registered_user->save();
+		}
+	}
     $em['success'] = 1;
     $em['datasuccess'] = ossn_print('account:created:email');
     echo json_encode($em);

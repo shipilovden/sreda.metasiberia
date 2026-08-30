@@ -1,5 +1,15 @@
 //<script>
 $(document).ready(function() {
+	/* Apply the selected registration language immediately through OSSN's normal locale loader. */
+	var signupLanguage = document.getElementById('sreda-signup-language');
+	if (signupLanguage && !signupLanguage.dataset.sredaLanguageHandler) {
+		signupLanguage.dataset.sredaLanguageHandler = '1';
+		signupLanguage.addEventListener('change', function() {
+			var currentUrl = new window.URL(window.location.href);
+			currentUrl.searchParams.set('language', this.value);
+			window.location.assign(currentUrl.toString());
+		});
+	}
 	if ($.fn.tooltip) {
 		$('[data-toggle="tooltip"]').tooltip({
 			placement:'left',
@@ -9,9 +19,49 @@ $(document).ready(function() {
 	if (Ossn.Config.isLoggedin === false) {
     	$('<style>').prop('type', 'text/css').html('.menu-likes-comments-share { display: none !important; }').appendTo('head');
 	}
+	/* Put the chat dock into the application stacking context. This lets the sidebar
+	 * (z-index 1100) cover it during its slide animation while keeping the dock above
+	 * the feed and footer when the sidebar is closed. */
+	var sibcoreAppShell = document.querySelector('.opensource-socalnetwork');
+	if (sibcoreAppShell) {
+		['.ossn-chat-base.d-none.d-lg-block', '.ossn-chat-windows-long'].forEach(function(selector) {
+			var chatLayer = document.querySelector(selector);
+			if (chatLayer && chatLayer.parentNode !== sibcoreAppShell) {
+				sibcoreAppShell.appendChild(chatLayer);
+			}
+		});
+		document.body.classList.add('sibcore-chat-dock-mounted');
+	}
+	/* On phones the topbar friends control toggles the compact chat rail. */
+	document.addEventListener('click', function(event) {
+		if (window.innerWidth > 991) {
+			return;
+		}
+		var friendsToggle = event.target.closest('#sibcore-friends-toggle > a');
+		if (!friendsToggle) {
+			return;
+		}
+		event.preventDefault();
+		event.stopPropagation();
+		event.stopImmediatePropagation();
+		var rail = document.querySelector('.ossn-chat-windows-long');
+		if (!rail) {
+			return;
+		}
+		var isOpen = document.body.classList.toggle('sibcore-friends-rail-open');
+		friendsToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+	}, true);
+	var sibcoreDrawerCloseTimer = null;
 	$(document).on('click', '#sidebar-toggle', function() {
 		var $toggle = $(this).attr('data-toggle');
 		if ($toggle == 0) {
+			if (sibcoreDrawerCloseTimer !== null) {
+				window.clearTimeout(sibcoreDrawerCloseTimer);
+				sibcoreDrawerCloseTimer = null;
+			}
+			document.body.classList.remove('sibcore-mobile-drawer-closing');
+			$('.sidebar').removeClass('sidebar-close');
+			$('.ossn-page-container').removeClass('sidebar-close-page-container');
 			$(this).attr('data-toggle', 1);
 			if($(document).innerWidth() >= 1300 && $('.ossn-page-loading-annimation').is(':visible')){
 				$('.sidebar').addClass('sidebar-open-no-annimation');	
@@ -21,11 +71,10 @@ $(document).ready(function() {
 				$('.ossn-page-container').addClass('sidebar-open-page-container');
 			}			
 			$('.topbar .right-side').addClass('right-side-space');
-			$('.topbar .right-side').addClass('sidebar-hide-contents-xs');
-			$('.ossn-inner-page').addClass('sidebar-hide-contents-xs');
 		}
 		if ($toggle == 1) {
 			$(this).attr('data-toggle', 0);
+			document.body.classList.add('sibcore-mobile-drawer-closing');
 			
 			$('.sidebar').removeClass('sidebar-open');
 			$('.sidebar').removeClass('sidebar-open-no-annimation');
@@ -33,12 +82,15 @@ $(document).ready(function() {
 			$('.ossn-page-container').removeClass('sidebar-open-page-container');
 			$('.ossn-page-container').removeClass('sidebar-open-page-container-no-annimation');
 			$('.topbar .right-side').removeClass('right-side-space');
-			$('.topbar .right-side').removeClass('sidebar-hide-contents-xs');
-			$('.ossn-inner-page').removeClass('sidebar-hide-contents-xs');
-
 			$('.topbar .right-side').addClass('right-side-nospace');
 			$('.sidebar').addClass('sidebar-close');
 			$('.ossn-page-container').addClass('sidebar-close-page-container');
+			sibcoreDrawerCloseTimer = window.setTimeout(function() {
+				document.body.classList.remove('sibcore-mobile-drawer-closing');
+				$('.sidebar').removeClass('sidebar-close');
+				$('.ossn-page-container').removeClass('sidebar-close-page-container');
+				sibcoreDrawerCloseTimer = null;
+			}, 500);
 
 		}
 		var document_height = $(document).height();

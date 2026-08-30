@@ -30,6 +30,7 @@ function ossn_goblue_theme_init() {
 		ossn_extend_view('ossn/site/head', 'ossn_goblue_head');
 		ossn_extend_view('ossn/site/head', 'ossn_goblue_angular_styles');
 		ossn_extend_view('js/opensource.socialnetwork', 'js/goblue');
+		ossn_extend_view('js/opensource.socialnetwork', 'js/sibcore_snow_boids');
 		ossn_extend_view('profile/newsfeed/info', 'goblue_search_bar_sidebar');
 		
 		if(ossn_isAdminLoggedin()) {
@@ -59,7 +60,7 @@ function goblue_search_bar_sidebar(){
 		), false);	
 }
 function theme_meta_favicon() {
-		$icon = ossn_add_cache_to_url(ossn_theme_url() . 'images/favicon.svg');
+		$icon = ossn_add_cache_to_url(ossn_theme_url() . 'images/favicon.svg?v=waypoints');
 		return "\r\n<link rel='icon' href='{$icon}' type='image/svg+xml' />";
 }
 /**
@@ -81,6 +82,7 @@ function ossn_goblue_lucide_icon($name, $class = '') {
 				'megaphone' => '<path d="m3 11 18-5v12L3 14v-3z"></path><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"></path>',
 				'chevron-down' => '<path d="m6 9 6 6 6-6"></path>',
 				'users' => '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path>',
+				'users-round' => '<path d="M18 21a8 8 0 0 0-16 0"></path><circle cx="10" cy="8" r="5"></circle><path d="M22 20c0-3.37-2-6.5-6-7.5"></path>',
 				'mail' => '<rect width="20" height="16" x="2" y="4" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>',
 				'globe' => '<circle cx="12" cy="12" r="10"></circle><path d="M2 12h20"></path><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>',
 				'map-pin' => '<path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 1 1 16 0"></path><circle cx="12" cy="10" r="3"></circle>',
@@ -226,6 +228,20 @@ body .ossn-message-box *:not(img):not(svg) {
 	border-radius: 0 !important;
 }
 
+/* The request control and the online-friends rail have separate actions. */
+#sibcore-friends-toggle > a {
+	box-sizing: border-box;
+	display: block;
+	color: #fff !important;
+}
+
+#sibcore-friends-toggle .ossn-lucide-icon,
+#ossn-notif-friends .ossn-lucide-icon {
+	color: #fff !important;
+	stroke: #fff !important;
+	fill: none !important;
+}
+
 /* Other public sections use the same square card language. */
 .ossn-page-container .ossn-photos li,
 .ossn-page-container .group-header-more,
@@ -258,6 +274,588 @@ body .ossn-message-box .control .controls .btn {
 .ossn-page-container .ossn-recent-message-status-online .ossn-inmessage-status-circle,
 .ossn-page-container .ossn-recent-message-status-offline .ossn-inmessage-status-circle {
 	border-radius: 50% !important;
+}
+
+/* Mobile shell: the navigation overlays the feed instead of moving or hiding it. */
+@media (max-width: 991px) {
+	.ossn-page-container.sidebar-open-page-container,
+	.ossn-page-container.sidebar-open-page-container-no-annimation {
+		margin-left: 0 !important;
+		width: 100% !important;
+	}
+
+	.ossn-page-container.sidebar-open-page-container .topbar,
+	.ossn-page-container.sidebar-open-page-container-no-annimation .topbar {
+		width: 100% !important;
+	}
+
+	/* Keep the content visible if an older cached script left the legacy class. */
+	.ossn-page-container .sidebar-hide-contents-xs,
+	.ossn-page-container .sidebar-hide-contents-xs .ossn-inner-page,
+	.topbar .right-side.sidebar-hide-contents-xs {
+		display: block !important;
+	}
+
+	.sidebar {
+		left: 0;
+		top: 0;
+		bottom: 0;
+		z-index: 1100;
+	}
+
+	/* Keep the hamburger available above the open drawer. */
+	.topbar {
+		z-index: 1150;
+	}
+
+	.topbar .left-side,
+	.topbar .topbar-menu-left,
+	.topbar .topbar-menu-left li,
+	.topbar .topbar-menu-left li a {
+		position: relative;
+		z-index: 1201;
+		color: #fff !important;
+	}
+
+	.topbar .topbar-menu-left li a .ossn-lucide-icon,
+	.topbar #sidebar-toggle .ossn-lucide-icon {
+		color: #fff !important;
+		stroke: #fff !important;
+		fill: none !important;
+	}
+
+	.topbar .topbar-menu-left li:hover,
+	.topbar .topbar-menu-left li:focus,
+	.topbar .topbar-menu-left li:active,
+	.topbar #sidebar-toggle:hover,
+	.topbar #sidebar-toggle:focus,
+	.topbar #sidebar-toggle:active {
+		background-color: transparent !important;
+	}
+
+	#sidebar-toggle {
+		position: relative;
+		z-index: 1201;
+	}
+
+	/* The drawer starts below the fixed topbar, so its profile block is not covered. */
+	.sidebar {
+		top: 48px;
+		height: calc(100vh - 48px);
+	}
+
+	/* The legacy chat layout adds a right margin while the drawer is open. */
+	.ossn-inner-page {
+		margin-right: 0 !important;
+	}
+
+	/* Keep the friends control reachable at the viewport edge while the menu is open. */
+	.topbar .right-side {
+		padding-right: 88px;
+	}
+
+	#ossn-notif-friends {
+		position: fixed;
+		top: 0;
+		right: 44px;
+		z-index: 1200;
+		background: #1e293b;
+	}
+
+	#ossn-notif-friends > a {
+		box-sizing: border-box;
+		min-width: 44px;
+		height: 48px;
+		display: flex !important;
+		align-items: center;
+		justify-content: center;
+		padding: 8px 10px !important;
+	}
+
+	#ossn-notif-friends .ossn-lucide-icon {
+		width: 20px;
+		height: 20px;
+	}
+
+	#sibcore-friends-toggle {
+		position: fixed;
+		top: 0;
+		right: 0;
+		z-index: 1200;
+		background: #1e293b;
+	}
+
+	#sibcore-friends-toggle > a {
+		min-width: 44px;
+		height: 48px;
+		display: flex !important;
+		align-items: center;
+		justify-content: center;
+		padding: 8px 10px !important;
+	}
+
+	#sibcore-friends-toggle .ossn-lucide-icon {
+		width: 20px;
+		height: 20px;
+	}
+
+	/* Compact online-friends rail for phones. */
+	.ossn-chat-windows-long {
+		display: block !important;
+		position: fixed;
+		top: 48px;
+		right: 0;
+		bottom: 30px;
+		width: 44px;
+		min-height: 0;
+		background: #1e293b;
+		border-left: 1px solid #334155;
+		z-index: 1050;
+		transform: translateX(100%);
+		visibility: hidden;
+		pointer-events: none;
+		transition: transform 0.2s ease, visibility 0.2s ease;
+	}
+
+	body.sibcore-friends-rail-open .ossn-chat-windows-long {
+		transform: translateX(0);
+		visibility: visible;
+		pointer-events: auto;
+	}
+
+	.ossn-chat-windows-long .inner {
+		box-sizing: border-box;
+		width: 100%;
+		height: 100% !important;
+		margin-top: 0 !important;
+		border-top: 1px solid rgba(255, 255, 255, 0.18);
+		overflow-x: hidden;
+		overflow-y: auto;
+		scrollbar-width: thin;
+		scrollbar-color: #64748b #1e293b;
+	}
+
+	.ossn-chat-windows-long .friends-list-item {
+		box-sizing: border-box;
+		width: 44px;
+		padding: 3px 0;
+		text-align: center;
+		border-top: 1px solid rgba(255, 255, 255, 0.08);
+		border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+	}
+
+	.ossn-chat-windows-long .friends-list-item .friends-item-inner {
+		box-sizing: border-box;
+		width: 44px;
+		height: 38px;
+		margin: 0;
+		padding: 2px 4px;
+	}
+
+	.ossn-chat-windows-long .friends-list-item .icon {
+		display: inline-block;
+		width: 34px;
+		height: 34px;
+	}
+
+	.ossn-chat-windows-long .friends-list-item .user-icon-small {
+		width: 34px;
+		height: 34px;
+		border-radius: 50% !important;
+	}
+
+	.ossn-chat-windows-long .friends-list-item .name {
+		display: none;
+	}
+
+	.ossn-chat-windows-long .ossn-chat-none,
+	.ossn-chat-windows-long .ossn-chat-pling {
+		box-sizing: border-box;
+		width: 44px;
+		padding: 6px 2px;
+		color: #fff;
+		text-align: center;
+		font-size: 11px;
+	}
+
+	/* Keep the chat bar and any open chat window directly above the footer. */
+	.ossn-chat-base.d-none.d-lg-block {
+		display: block !important;
+	}
+
+	.ossn-chat-base {
+		left: 0;
+		/* Override the OSSN Chat component's mobile bottom: 0 rule. */
+		bottom: calc(var(--sibcore-mobile-footer-height) + var(--sibcore-mobile-chat-gap)) !important;
+		width: 100%;
+		height: 28px;
+		margin: 0;
+		padding: 0 44px 0 6px;
+		box-sizing: border-box;
+		z-index: 1060;
+		pointer-events: none;
+		display: flex !important;
+		align-items: flex-end;
+		justify-content: flex-end;
+		gap: 4px;
+	}
+
+	.ossn-chat-base .ossn-chat-bar,
+	.ossn-chat-base .ossn-chat-containers,
+	.ossn-chat-base .friend-tab-item {
+		pointer-events: auto;
+	}
+
+	.ossn-chat-base .ossn-chat-bar {
+		width: 118px;
+		min-width: 118px;
+		flex: 0 0 118px;
+		float: none;
+		margin: 0 !important;
+	}
+
+	.ossn-chat-base .ossn-chat-bar .inner,
+	.ossn-chat-base .friend-tab-item .friend-tab {
+		box-sizing: border-box;
+		height: 28px;
+		min-height: 28px;
+		margin: 0 !important;
+		padding: 5px 7px;
+		border-radius: 0 !important;
+		overflow: hidden;
+	}
+
+	.ossn-chat-base .ossn-chat-bar .ossn-chat-inner-text,
+	.ossn-chat-base .friend-tab-item .ossn-chat-inner-text {
+		box-sizing: border-box;
+		width: 100%;
+		margin: 0;
+		line-height: 16px;
+		text-overflow: ellipsis;
+		overflow: hidden;
+		white-space: nowrap;
+	}
+
+	.ossn-chat-base .ossn-chat-containers {
+		box-sizing: border-box;
+		min-width: 0;
+		max-width: 50%;
+		display: flex;
+		align-items: flex-end;
+		gap: 4px;
+	}
+
+	.ossn-chat-base .friend-tab-item {
+		box-sizing: border-box;
+		width: 118px;
+		min-width: 118px;
+		flex: 0 0 118px;
+		float: none;
+		margin: 0 !important;
+	}
+
+	.ossn-chat-base .friend-tab-item:first-child {
+		margin-right: 0 !important;
+	}
+
+	/* Keep an opened chat inside the viewport and above the bottom tabs. */
+	.ossn-chat-base .friend-tab-item .tab-container {
+		box-sizing: border-box;
+		position: fixed;
+		left: 12px;
+		right: auto;
+		bottom: calc(var(--sibcore-mobile-footer-height) + var(--sibcore-mobile-chat-gap) + 28px);
+		width: min(330px, calc(100vw - 62px)) !important;
+		height: min(400px, calc(100vh - 120px)) !important;
+		max-height: calc(100vh - 120px);
+		margin: 0 !important;
+		border-radius: 0 !important;
+		overflow: hidden;
+		z-index: 1065;
+	}
+
+	.ossn-chat-base .friend-tab-item .tab-container .ossn-chat-tab-titles,
+	.ossn-chat-base .friend-tab-item .tab-container .data {
+		box-sizing: border-box;
+		width: 100% !important;
+	}
+
+	.ossn-chat-base .friend-tab-item .tab-container .data {
+		height: calc(100% - 48px) !important;
+		max-height: none;
+	}
+
+	/* The compact closed-chat tab must never let the legacy absolute input overflow. */
+	.ossn-chat-base .friend-tab-item .friend-tab {
+		position: relative;
+	}
+
+	.ossn-chat-base .friend-tab-item .friend-tab form {
+		box-sizing: border-box;
+		position: fixed;
+		left: 12px;
+		bottom: calc(var(--sibcore-mobile-footer-height) + var(--sibcore-mobile-chat-gap) + 28px);
+		width: min(330px, calc(100vw - 62px));
+		height: 34px;
+		margin: 0 !important;
+		z-index: 1070;
+	}
+
+	.ossn-chat-base .friend-tab-item .friend-tab input[type='text'] {
+		box-sizing: border-box;
+		left: 0;
+		top: 0;
+		width: 100% !important;
+		max-width: none;
+		height: 34px;
+		margin: 0 !important;
+		padding-right: 72px;
+		border-radius: 0 !important;
+	}
+
+	.ossn-chat-base .friend-tab-item .friend-tab .ossn-chat-icon-smile-set {
+		top: 3px;
+		right: 4px;
+		width: 68px;
+		height: 28px;
+		margin: 0;
+		padding: 0;
+		z-index: 1;
+		margin: 0 !important;
+	}
+}
+
+@media (min-width: 992px) {
+	/* The separate friends-rail toggle is a mobile-only control. */
+	#sibcore-friends-toggle {
+		display: none !important;
+	}
+
+	/* Keep the desktop chat-sound control visible and fully clickable. */
+	.ossn-chat-windows-long .ossn-chat-pling {
+		box-sizing: border-box;
+		display: block;
+		width: 100%;
+		min-height: 32px;
+		padding: 6px 0;
+		text-align: center;
+		color: #fff;
+		cursor: pointer;
+		pointer-events: auto;
+		position: relative;
+		z-index: 1;
+	}
+
+	.ossn-chat-windows-long .ossn-chat-pling i {
+		pointer-events: none;
+	}
+
+	/* The active chat window must sit above the fixed footer on desktop too. */
+	.ossn-chat-base {
+		bottom: 32px;
+		z-index: 1060;
+	}
+}
+
+/* Decorative flocking snow stays behind the feed and outside the fixed chrome. */
+#sibcore-boids-canvas {
+	position: fixed;
+	inset: 0;
+	display: block;
+	width: 100vw;
+	height: 100vh;
+	z-index: 0;
+	pointer-events: none;
+	opacity: 0.62;
+}
+
+/* Keep the complete application layer above the decorative canvas. */
+.opensource-socalnetwork {
+	position: relative;
+	z-index: 1;
+}
+
+/* Public registration and login pages have no authenticated side rail: use the full
+ * viewport and keep their transparent background so the shared snow flock remains
+ * visible behind the form. Authenticated feed geometry is left unchanged. */
+.opensource-socalnetwork:has(.sreda-registration-only) .ossn-page-container,
+.opensource-socalnetwork:has(.sreda-registration-only) .ossn-inner-page,
+.opensource-socalnetwork:has(.sreda-registration-only) .ossn-startup-wrapper,
+.opensource-socalnetwork:has(.sreda-login-only) .ossn-page-container,
+.opensource-socalnetwork:has(.sreda-login-only) .ossn-inner-page,
+.opensource-socalnetwork:has(.sreda-login-only) .ossn-startup-wrapper {
+	width: 100% !important;
+	max-width: none !important;
+	margin-left: 0 !important;
+	margin-right: 0 !important;
+}
+
+.opensource-socalnetwork:has(.sreda-registration-only) .ossn-startup-wrapper,
+.opensource-socalnetwork:has(.sreda-login-only) .ossn-startup-wrapper {
+	background: transparent !important;
+}
+
+@media (max-width: 991px) {
+	#sibcore-boids-canvas {
+		width: 100vw;
+		height: 100vh;
+		opacity: 0.36;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	#sibcore-boids-canvas {
+		display: none !important;
+	}
+}
+
+/* The authenticated footer remains fixed on phones and leaves room for the last post. */
+@media (max-width: 1359px) {
+	:root {
+		--sibcore-mobile-footer-height: 30px;
+		--sibcore-mobile-chat-gap: 0px;
+	}
+
+	.opensource-socalnetwork:has(.sidebar) .ossn-inner-page {
+		padding-bottom: 50px;
+	}
+
+	.opensource-socalnetwork:has(.sidebar) .sibcore-site-footer {
+		position: fixed;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		z-index: 1040;
+		box-sizing: border-box;
+		height: var(--sibcore-mobile-footer-height);
+		min-height: var(--sibcore-mobile-footer-height);
+		margin: 0;
+		padding: 4px 8px;
+		background: #eaeaea;
+		border-top: 1px solid #d2d2d2;
+		overflow: hidden;
+	}
+
+	.sibcore-site-footer .footer-contents,
+	.sibcore-site-footer .ossn-footer-menu {
+		box-sizing: border-box;
+		padding-bottom: 0;
+		line-height: 20px;
+		text-align: right;
+		white-space: nowrap;
+		overflow: hidden;
+	}
+
+	.sibcore-site-footer .ossn-footer-menu a {
+		font-size: 11px;
+	}
+}
+
+/* Final mobile chat dock: keep every compact chat tab in one row above the fixed footer. */
+@media (max-width: 991px) {
+	body .ossn-chat-base.d-none.d-lg-block {
+		position: fixed !important;
+		top: auto !important;
+		right: 0 !important;
+		bottom: calc(var(--sibcore-mobile-footer-height, 30px) + var(--sibcore-mobile-chat-gap, 0px)) !important;
+		left: 0 !important;
+		width: 100vw !important;
+		height: 28px !important;
+		min-height: 28px !important;
+		margin: 0 !important;
+		padding: 0 !important;
+		display: flex !important;
+		align-items: stretch !important;
+		justify-content: flex-start !important;
+		gap: 4px !important;
+		transform: none !important;
+		overflow: visible !important;
+		z-index: 1060 !important;
+		opacity: 1 !important;
+		transition: opacity 0.5s ease !important;
+	}
+
+	/* The chat dock is moved into the application shell by goblue.js. Keep it below the
+	 * drawer while it slides, without removing the rendered chat tabs. */
+	body:has(.sidebar.sidebar-open) .ossn-chat-base.d-none.d-lg-block,
+	body:has(.sidebar.sidebar-open-no-annimation) .ossn-chat-base.d-none.d-lg-block {
+		z-index: 1060 !important;
+		pointer-events: none !important;
+	}
+
+	/* Keep the dock under the closing drawer until the drawer animation has finished,
+	 * then let it fade back above the feed instead of appearing abruptly. */
+	body.sibcore-mobile-drawer-closing .ossn-chat-base.d-none.d-lg-block {
+		z-index: 1060 !important;
+		opacity: 0 !important;
+		pointer-events: none !important;
+	}
+
+	body .ossn-chat-base.d-none.d-lg-block > .ossn-chat-bar,
+	body .ossn-chat-base.d-none.d-lg-block > .ossn-chat-containers {
+		position: static !important;
+		top: auto !important;
+		right: auto !important;
+		bottom: auto !important;
+		left: auto !important;
+		transform: none !important;
+		float: none !important;
+		margin: 0 !important;
+		height: 28px !important;
+		min-height: 28px !important;
+		align-self: stretch !important;
+	}
+
+	body .ossn-chat-base.d-none.d-lg-block > .ossn-chat-bar {
+		flex: 0 0 118px !important;
+		width: 118px !important;
+		min-width: 118px !important;
+	}
+
+	body .ossn-chat-base.d-none.d-lg-block > .ossn-chat-containers {
+		display: flex !important;
+		flex: 0 1 auto !important;
+		width: auto !important;
+		max-width: calc(100vw - 122px) !important;
+		min-width: 0 !important;
+		align-items: stretch !important;
+		gap: 4px !important;
+	}
+
+	body .ossn-chat-base.d-none.d-lg-block .friend-tab-item {
+		position: static !important;
+		top: auto !important;
+		right: auto !important;
+		bottom: auto !important;
+		left: auto !important;
+		transform: none !important;
+		float: none !important;
+		flex: 0 0 118px !important;
+		width: 118px !important;
+		min-width: 118px !important;
+		height: 28px !important;
+		min-height: 28px !important;
+		margin: 0 !important;
+	}
+
+	body .ossn-chat-base.d-none.d-lg-block .friend-tab-item .friend-tab,
+	body .ossn-chat-base.d-none.d-lg-block .ossn-chat-bar > .inner {
+		position: relative !important;
+		top: auto !important;
+		right: auto !important;
+		bottom: auto !important;
+		left: auto !important;
+		transform: none !important;
+		height: 28px !important;
+		min-height: 28px !important;
+		margin: 0 !important;
+	}
+
+	/* The message window and its input remain above this dock. */
+	body .ossn-chat-base.d-none.d-lg-block .friend-tab-item .tab-container,
+	body .ossn-chat-base.d-none.d-lg-block .friend-tab-item .friend-tab form {
+		bottom: calc(var(--sibcore-mobile-footer-height, 30px) + var(--sibcore-mobile-chat-gap, 0px) + 28px) !important;
+	}
 }
 </style>
 HTML;

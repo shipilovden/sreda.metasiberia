@@ -10,12 +10,13 @@
  */
 $error = input('error');
 ?>
-<div class="ossn-login">
+<div class="ossn-login sreda-login-only">
     <div class="row justify-content-center align-items-center">
         <div class="col-lg-6 col-md-8 col-sm-10">
             <div class="glass-signup-card login-card-custom">
                 <div class="login-icon-badge">
-                    <i class="fa fa-user-lock"></i>
+                    <img src="<?php echo ossn_add_cache_to_url(ossn_theme_url() . 'images/favicon.svg?v=waypoints'); ?>"
+                        alt="" width="48" height="48" />
                 </div>
                 <div class="text-center mb-4 mt-4">
                     <h2 class="fw-bold text-dark"><?php echo ossn_print('site:login'); ?></h2>

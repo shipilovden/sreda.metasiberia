@@ -572,6 +572,32 @@ a {
 	position: absolute;
 }
 
+/* Public pages keep the SREDA mark at the left edge of the topbar. */
+.sreda-topbar-favicon {
+	position: absolute;
+	left: 8px;
+	top: calc(50% + 1px) !important;
+	width: 28px;
+	height: 28px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	transform: translateY(-50%) !important;
+	line-height: 0;
+	z-index: 2;
+}
+
+.sreda-topbar-favicon:hover,
+.sreda-topbar-favicon:focus {
+	text-decoration: none;
+}
+
+.sreda-topbar-favicon img {
+	display: block;
+	width: 24px;
+	height: 24px;
+}
+
 /************************************************
    Topbar Dropdown and Post+Comment menu icons
 *************************************************/
@@ -2431,7 +2457,7 @@ label {
 }
 
 .ossn-startup-wrapper .glass-signup-card {
-	background: #fff;
+	background: #1e293b;
 	color: #fff;
 	backdrop-filter: blur(25px);
 	-webkit-backdrop-filter: blur(25px);
@@ -2488,6 +2514,17 @@ label {
 	margin-top: 15px;
 }
 
+.ossn-startup-wrapper #ossn-home-signup .sreda-signup-language {
+	margin-top: 15px;
+}
+
+.ossn-startup-wrapper #ossn-home-signup .sreda-signup-language label {
+	display: block;
+	margin-bottom: 5px;
+	color: #fff;
+	font-weight: 700;
+}
+
 .topbar::before {
 	content: "";
 	position: absolute;
@@ -2500,22 +2537,11 @@ label {
 }
 
 .ossn-startup-wrapper .glass-signup-card:before {
-	content: "";
-	position: absolute;
-	inset: 0;
-	background-size: cover;
-	z-index: -2;
-	background: url("<?php echo ossn_theme_url();?>images/background.jpg") no-repeat;
-	background-size: cover;
+	display: none;
 }
 
 .ossn-startup-wrapper .glass-signup-card:after {
-	content: "";
-	position: absolute;
-	inset: 0;
-	z-index: -1;
-	border-radius: 24px;
-	background: linear-gradient(to bottom, rgba(255, 255, 255, 0) -2%, rgba(255, 255, 255, 0) 10%, rgba(255, 255, 255, 0.4) 90%);
+	display: none;
 }
 
 .ossn-startup-wrapper #ossn-home-signup a {
@@ -2538,8 +2564,8 @@ label {
 
 	/* White Background Style */
 	background: #ffffff;
-	color: #0b769c;
-	/* Text matches the border */
+	color: #1e293b;
+	/* Text matches the registration form background */
 
 	font-weight: 700;
 	/* Slightly heavier weight for white buttons */
@@ -2591,28 +2617,38 @@ label {
 
 /* The Floating Icon Badge */
 .ossn-login .login-icon-badge {
-	background: linear-gradient(135deg, #0b769c 0%, #085e7d 100%);
-	border-radius: 50%;
+	background: transparent;
+	border-radius: 0;
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	width: 70px;
 	height: 70px;
-	background: #0b769c;
 	color: #fff;
-	font-size: 24px;
-	box-shadow: 0 8px 20px rgba(11, 118, 156, 0.2);
-	border: 4px solid #fff;
+	box-shadow: none;
+	border: 0;
 	margin: 0 auto;
+}
+
+.ossn-login .login-icon-badge img {
+	display: block;
+	width: 48px;
+	height: 48px;
 }
 
 .ossn-login .ossn-startup-wrapper .glass-signup-card .login-card-custom,
 .ossn-login .login-card-custom {
-	color: #000 !important;
+	color: #fff !important;
 }
 
 .ossn-login .login-card-custom:before {
 	display: none;
+}
+
+.ossn-login .login-card-custom h2,
+.ossn-login .login-card-custom h2.text-dark,
+.ossn-login .login-card-custom label {
+	color: #fff !important;
 }
 
 /* Add a subtle animation to the icon */
@@ -2646,20 +2682,31 @@ label {
 
 /* Links Styling */
 .ossn-login .forgot-link {
-	color: #0b769c;
+	color: #fff;
 	text-decoration: none;
 	transition: color 0.2s;
 }
 
 .ossn-login .forgot-link:hover {
-	color: #0b769c;
+	color: #fff;
 }
 
 .ossn-login .signup-link-text {
-	color: #0b769c;
+	color: #fff;
 	font-weight: 700;
 	text-decoration: none;
 	margin-left: 5px;
+}
+
+.ossn-login #ossn-login input[type="submit"] {
+	background: #fff !important;
+	color: #1e293b !important;
+	border-color: #fff !important;
+}
+
+.ossn-login #ossn-login input[type="submit"]:hover {
+	background: #e7e7e7 !important;
+	color: #1e293b !important;
 }
 
 /* Styling the custom button */

@@ -39,6 +39,8 @@ $en = array(
 	'gender:other' => 'Other',
     'female' => 'Female',
     'account:create:notice' => 'By clicking Create an account, you agree to our',
+    'account:create:notice:and' => ' and ',
+    'account:create:privacy' => 'Privacy Policy',
     'gender' => 'Gender',
     
     'account:settings' => 'Account Settings',

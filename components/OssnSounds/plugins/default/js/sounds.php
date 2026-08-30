@@ -45,7 +45,7 @@ $(document).ready(function() {
 		}
 	}
 		
-	$(".ossn-chat-pling").on('click', function(e) {
+	$(document).on('click', '.ossn-chat-pling', function(e) {
 		e.stopImmediatePropagation();
 		player = $('#ossn-chat-sound').get(0);
 		pling  = '<?php echo ossn_site_url("components/OssnSounds/audios/pling.mp3"); ?>';
@@ -67,7 +67,7 @@ $(document).ready(function() {
 		}
 	});
 
-	$(".ossn-message-pling").on('click', function(e) {
+	$(document).on('click', '.ossn-message-pling', function(e) {
 		player = $('#ossn-message-sound').get(0);
 		pling  = '<?php echo ossn_site_url("components/OssnSounds/audios/pling.mp3"); ?>';
 		bell   = $('.ossn-message-pling').find('i');

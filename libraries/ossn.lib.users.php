@@ -440,6 +440,11 @@ function ossn_site_user_lang_code($hook, $type, $return, $params) {
 				if(isset($user->language)) {
 						$lang = $user->language;
 				}
+		} else {
+				$selected_language = input('language');
+				if(is_string($selected_language) && in_array($selected_language, ossn_get_available_languages(), true)) {
+						$lang = $selected_language;
+				}
 		}
 		return $lang;
 }

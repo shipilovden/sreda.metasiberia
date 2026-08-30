@@ -13,6 +13,8 @@
 
 Коммиты и push выполняются только по отдельному разрешению.
 
+Операционный runbook с локальным запуском, Ubuntu-схемой, сервисами, путями, БД и резервными копиями: [SREDA_LOCAL_AND_UBUNTU_RUNBOOK.md](SREDA_LOCAL_AND_UBUNTU_RUNBOOK.md).
+
 ## 2. Локальная среда
 
 - веб-сервер: Apache из Laragon;
