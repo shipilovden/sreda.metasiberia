@@ -93,6 +93,19 @@ curl.exe -I http://localhost/
 & 'C:\laragon\bin\mysql\mysql-8.4.3-winx64\bin\mysql.exe' -uroot -N -e "SHOW DATABASES LIKE 'ossn_metasiberia_local';"
 ```
 
+Если команда не вывела имя базы, локальная БД отсутствует. Не удаляй `installation/INSTALLED` и не переустанавливай приложение: создай только локальную БД и импортируй штатную схему:
+
+```powershell
+$mysql = 'C:\laragon\bin\mysql\mysql-8.4.3-winx64\bin\mysql.exe'
+
+& $mysql -uroot -e "CREATE DATABASE IF NOT EXISTS ossn_metasiberia_local CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+
+Get-Content -Raw -LiteralPath 'C:\programming\Metasiberia official\sreda.metasiberia\installation\sql\opensource-socialnetwork.sql' |
+  & $mysql -uroot ossn_metasiberia_local
+```
+
+После импорта открой `http://localhost/` и проверь страницу в браузере. Этот импорт создаёт пустую локальную установку из схемы; старые локальные посты и пользователи восстановятся только из backup базы.
+
 Письма активации в локальной среде не гарантируются. Для теста пользователя можно подтвердить администратором через `unvalidated_users`; реальную доставку нужно настраивать через SMTP.
 
 ## 5. Ubuntu: адрес и прокси
@@ -276,6 +289,8 @@ git diff --check и просмотр diff
 8. После публикации проверить в браузере все изменённые сценарии на публичном адресе.
 9. При ошибке остановить публикацию, сохранить логи и восстановить предыдущую серверную копию из backup. Не исправлять production экспериментами.
 
+Важно: `Ctrl+F5` очищает только кэш браузера и не исправляет OSSN-кэш на сервере. При белом экране сначала проверить непустой HTTP-ответ, `plugins_paths`, `ossn.ru.json` и Apache error log. Не удалять каталог `/srv/sreda/data/system` вручную без последующего полного `DisableCache -> EnableCache` и проверки.
+
 ## 8. Правила обновления приложения
 
 Перед обновлением:
@@ -293,6 +308,28 @@ git diff --check и просмотр diff
 - `ossn_data` или `/srv/sreda/data`;
 - `cache` как источник логики;
 - `installation/INSTALLED`.
+
+У OSSN есть два независимых набора генерируемого кэша: `/srv/sreda/app/cache` и `/srv/sreda/data/system`. Во втором находятся `plugins_paths` и `locales/ossn.*.json`; отсутствие этих файлов при включённом cache может дать белый экран или старые переводы. Оба каталога должны быть доступны пользователю деплоя и группе `www-data`.
+
+Кэш обновляется только полной парой команд и одним и тем же пользователем:
+
+```bash
+cd /srv/sreda/app
+/usr/bin/php system/handlers/cli --handler=DisableCache
+/usr/bin/php system/handlers/cli --handler=EnableCache
+```
+
+Нельзя считать обновление успешным только по сообщению `Cache has been enabled`. После него обязательны проверки:
+
+```bash
+test -s /srv/sreda/data/system/plugins_paths
+test -s /srv/sreda/data/system/locales/ossn.ru.json
+grep -Fq 'Муж' /srv/sreda/data/system/locales/ossn.ru.json
+grep -Fq 'Жен' /srv/sreda/data/system/locales/ossn.ru.json
+curl -ksS https://sreda.metasiberia.com/ | wc -c
+```
+
+Последняя команда должна вернуть ненулевой размер HTML. При нулевом размере, `HTTP 500`, белом экране или отсутствии любого обязательного файла deployment считается неуспешным.
 
 Серверные конфигурации OSSN сохраняются отдельно. На сервере нужны `libraries.php`, `classes.php`, `ossn.config.dcache.php`, DB/site-конфигурации и данные установки; их нельзя случайно удалить при синхронизации.
 
@@ -326,7 +363,127 @@ sudo tar -C /srv/sreda -czf \
 
 На текущем сервере нет отдельного `sreda`/`ossn` systemd-timer. Существующий `metasiberia-critical-backup.timer` относится к критическому состоянию основного сервера и не доказывает, что БД/данные SREDA входят в его набор. Автоматическое резервирование SREDA нельзя считать настроенным без отдельной проверки состава и retention.
 
-## 10. Администрирование и безопасность
+## 10. Повторяемый deployment одной командой
+
+Для обычного обновления PHP/CSS/JavaScript и других tracked-файлов приложения используется готовый workflow:
+
+```text
+локальная правка
+    ↓
+локальная проверка и браузерный тест
+    ↓
+git diff --check и просмотр diff
+    ↓
+commit в локальном репозитории
+    ↓
+Deploy-Sreda.ps1 -DryRun
+    ↓
+git push origin master (если commit нужно сохранить на GitHub)
+    ↓
+Deploy-Sreda.ps1 -ConfirmProduction
+    ↓
+backup приложения и БД на Ubuntu
+    ↓
+проверка SHA256 staged release
+    ↓
+безопасная синхронизация /srv/sreda/app
+    ↓
+refresh OSSN cache и smoke-test
+    ↓
+при ошибке — автоматический rollback файлов приложения
+```
+
+Скрипты находятся в `ops/`:
+
+- `ops/Deploy-Sreda.ps1` — запускается на Windows из корня репозитория;
+- `ops/sreda-deploy-remote.sh` — временный helper, загружаемый скриптом в server inbox и удаляемый после успешного запуска.
+
+### 10.1. Обязательный порядок обновления
+
+Каждое изменение SREDA проходит один и тот же порядок:
+
+1. Внести правки и проверить их локально в браузере.
+2. Проверить diff и создать commit:
+
+```powershell
+git diff --check
+git add <изменённые-файлы>
+git commit -m "краткое описание изменений"
+```
+
+3. Запустить безопасную локальную проверку release:
+
+```powershell
+cd 'C:\programming\Metasiberia official\sreda.metasiberia'
+.\ops\Deploy-Sreda.ps1 -DryRun
+```
+
+4. Если dry-run завершился успешно, при необходимости сохранить commit в GitHub:
+
+```powershell
+git push origin master
+```
+
+5. После этого выполнить production deployment:
+
+```powershell
+.\ops\Deploy-Sreda.ps1 -ConfirmProduction
+```
+
+`-DryRun` создаёт release-архив и SHA256 manifest, но не подключается к серверу и ничего не изменяет. Реальный запуск разрешён только с явным `-ConfirmProduction` и только для `https://sreda.metasiberia.com/`.
+
+`git push` и deployment — разные операции: push сохраняет commit на GitHub, а скрипт deployment обновляет production из текущего локального `HEAD`. Скрипт не делает commit и push автоматически и остановится, если рабочее дерево не чистое.
+
+Во время реального запуска потребуется обычная SSH-аутентификация и пароль `sudo` на Ubuntu. Пароли, ключи и runtime-конфигурации в скрипты не записываются.
+
+### 10.2. Что проверяет workflow
+
+Перед загрузкой скрипт проверяет чистое Git-дерево, `git diff --check`, commit и PHP-файлы commit. Затем создаёт архив именно из `HEAD` и manifest SHA256 для tracked-файлов.
+
+На Ubuntu helper:
+
+1. сохраняет архив текущего `/srv/sreda/app` и SQL backup базы `sreda_ossn` в `/srv/metasiberia/data/sreda-backups`;
+2. распаковывает staged release во временный каталог пользователя;
+3. проверяет SHA256 каждого файла staged release;
+4. синхронизирует код в `/srv/sreda/app`;
+5. сохраняет без изменений `configurations/ossn.config.db.php`, `configurations/ossn.config.site.php`, `installation/INSTALLED`, `/srv/sreda/data`, cache, `docs` и `ops`;
+6. восстанавливает права на оба набора генерируемого cache и выполняет штатный `DisableCache` → `EnableCache`;
+7. проверяет `plugins_paths` и русскую локализацию (`Муж`/`Жен` без устаревших `Самец`/`Самка`);
+8. проверяет `apache2`, `caddy`, `mysql`, непустой HTML главной страницы и `/login`;
+9. если ошибка произошла после замены приложения, восстанавливает предыдущий архив приложения и повторно пересоздаёт OSSN cache.
+
+Скрипт не меняет Caddy/Apache-конфигурацию, DNS, systemd, MySQL-схему или пользовательские данные. Перезапуск сервисов для обычного обновления кода не требуется; если отдельно меняется конфигурация сервера, это выполняется отдельной процедурой после проверки конфигурации.
+
+### 10.3. Исключения
+
+- `-KeepArtifacts` оставляет локальный архив и manifest для диагностики;
+- `-SkipLint` допускается только если PHP CLI временно недоступен и PHP-файлы были проверены другим способом;
+- при любой ошибке deployment не повторять вслепую: сначала сохранить вывод скрипта и проверить `FAILED_STAGE`, backup и серверные логи.
+
+### 10.4. Стоп-условия и восстановление
+
+Deployment останавливается и не выводит `DEPLOYMENT=success`, если:
+
+- отсутствует или пуст `/srv/sreda/data/system/plugins_paths`;
+- отсутствует или пуст `/srv/sreda/data/system/locales/ossn.ru.json`;
+- в русской локализации остались `Самец` или `Самка`;
+- главная страница или `/login` возвращает пустой HTML;
+- сервисы `mysql`, `apache2` или `caddy` не active.
+
+При белом экране не выполнять произвольные очистки и не менять production-код вручную. Сначала сохранить вывод:
+
+```bash
+curl -k -sS -D - https://sreda.metasiberia.com/ -o /tmp/sreda-response.html
+wc -c /tmp/sreda-response.html
+find /srv/sreda/data/system -maxdepth 2 -type f -ls
+sudo tail -n 100 /var/log/apache2/sreda_error.log
+```
+
+Затем выполнить восстановление кэша тем же пользователем, который владеет runtime-каталогами, и повторить все проверки. Если проверка не проходит, deployment считать остановленным и использовать backup/rollback.
+
+Этот workflow не выполняет `git commit` и `git push`; commit и push остаются отдельными действиями владельца репозитория.
+
+## 11. Администрирование и безопасность
 
 - админка: `https://sreda.metasiberia.com/administrator/`;
 - неподтверждённые пользователи: `https://sreda.metasiberia.com/administrator/unvalidated_users`;
