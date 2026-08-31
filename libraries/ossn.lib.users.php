@@ -406,18 +406,18 @@ function ossn_uservalidate_pagehandler($pages) {
 								$user       = ossn_user_by_guid($pages[1]);
 								if($user->isUserVALIDATED()){
 										ossn_trigger_message(ossn_print('user:account:validated'), 'success');
-										redirect();									
+										redirect('login');
 								}
 								
 								$user       = new OssnUser();
 								$user->guid = $pages[1];
 								if($user->ValidateRegistration($pages[2])) {
 										ossn_trigger_message(ossn_print('user:account:validated'), 'success');
-										redirect();
+										redirect('login');
 								} else {
 										//Shows a red warning if can not validate email address #1481
 										ossn_trigger_message(ossn_print('user:account:validate:fail'), 'error');
-										redirect();
+										redirect('login');
 								}
 						}
 						break;
