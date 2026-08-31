@@ -1,0 +1,25 @@
+<?php
+$en = array(
+		'sreda:giphy:button'        => 'GIF',
+		'sreda:giphy:title'         => 'GIF',
+		'sreda:giphy:find'          => 'Find GIF',
+		'sreda:giphy:search'        => 'Search GIF',
+		'sreda:giphy:remove'        => 'Remove GIF',
+		'sreda:giphy:loading'       => 'Loading GIFs…',
+		'sreda:giphy:load:error'    => 'Unable to load GIF',
+		'sreda:giphy:no:results'    => 'No GIFs found',
+		'sreda:giphy:close'         => 'Close',
+		'sreda:giphy:preview'       => 'Selected GIF',
+		'sreda:giphy:powered'       => 'Powered by GIPHY',
+		'sreda:link:button'         => 'Link',
+		'sreda:link:tooltip'        => 'Add a link preview',
+		'sreda:link:title'          => 'Link',
+		'sreda:link:input'          => 'Paste a link',
+		'sreda:link:preview'        => 'Show preview',
+		'sreda:link:loading'        => 'Loading preview…',
+		'sreda:link:error'          => 'Unable to load link preview',
+		'sreda:link:remove'         => 'Remove link',
+		'sreda:link:replace'        => 'Replace link',
+		'sreda:link:no:title'       => 'Untitled',
+);
+ossn_register_languages('en', $en);

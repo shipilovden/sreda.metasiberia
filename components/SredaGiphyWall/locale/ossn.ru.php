@@ -1,0 +1,25 @@
+<?php
+$ru = array(
+		'sreda:giphy:button'        => 'GIF',
+		'sreda:giphy:title'         => 'GIF',
+		'sreda:giphy:find'          => 'Найти GIF',
+		'sreda:giphy:search'        => 'Поиск GIF',
+		'sreda:giphy:remove'        => 'Удалить GIF',
+		'sreda:giphy:loading'       => 'Загрузка GIF…',
+		'sreda:giphy:load:error'    => 'Не удалось загрузить GIF',
+		'sreda:giphy:no:results'    => 'GIF не найдены',
+		'sreda:giphy:close'         => 'Закрыть',
+		'sreda:giphy:preview'       => 'Выбранный GIF',
+		'sreda:giphy:powered'       => 'Powered by GIPHY',
+		'sreda:link:button'         => 'Ссылка',
+		'sreda:link:tooltip'        => 'Добавить ссылку с предпросмотром',
+		'sreda:link:title'          => 'Ссылка',
+		'sreda:link:input'          => 'Вставьте ссылку',
+		'sreda:link:preview'        => 'Показать превью',
+		'sreda:link:loading'        => 'Загрузка превью…',
+		'sreda:link:error'          => 'Не удалось загрузить превью ссылки',
+		'sreda:link:remove'         => 'Удалить ссылку',
+		'sreda:link:replace'        => 'Заменить ссылку',
+		'sreda:link:no:title'       => 'Без названия',
+);
+ossn_register_languages('ru', $ru);

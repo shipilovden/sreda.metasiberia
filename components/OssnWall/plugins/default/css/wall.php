@@ -495,6 +495,10 @@
 	background: #fff;
 	border: 1px solid #d6dce5;
 	box-shadow: 0 5px 18px rgba(15, 23, 42, 0.2);
+	max-height: 70vh;
+	max-height: min(70dvh, 560px);
+	overflow-x: hidden;
+	overflow-y: auto;
 	z-index: 100;
 }
 
@@ -655,7 +659,7 @@
 ***************************/
 
 @media (max-width: 991px) {
-	/* The share popup is viewport-positioned by ossn_share.php on phones and tablets. */
+	/* The share popup is viewport-positioned by ossn_share.php on every screen. */
 	.ossn-wall-item .ossn-wall-share-menu {
 		position: fixed;
 		top: 8px;
