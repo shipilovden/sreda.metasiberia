@@ -654,6 +654,24 @@
 	Mobile Layout Settings
 ***************************/
 
+@media (max-width: 991px) {
+	/* The share popup is viewport-positioned by ossn_share.php on phones and tablets. */
+	.ossn-wall-item .ossn-wall-share-menu {
+		position: fixed;
+		top: 8px;
+		left: 8px;
+		right: 8px;
+		bottom: auto;
+		width: auto;
+		min-width: 0;
+		max-width: none;
+		max-height: min(70dvh, 420px);
+		overflow-x: hidden;
+		overflow-y: auto;
+		transform: none;
+	}
+}
+
 @media (max-width: 480px) {
 	.ossn-wall-item-type {
 		display: block;

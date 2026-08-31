@@ -47,12 +47,73 @@
 	}
 
 	function closeMenus() {
-		$('.ossn-wall-share-dropdown.is-open').removeClass('is-open')
-			.find('.ossn-wall-share-toggle').attr('aria-expanded', 'false')
-			.end().find('.ossn-wall-share-menu').attr('hidden', 'hidden');
+		$('.ossn-wall-share-dropdown.is-open').each(function () {
+			var $dropdown = $(this);
+			$dropdown.removeClass('is-open');
+			$dropdown.find('.ossn-wall-share-toggle').attr('aria-expanded', 'false');
+			$dropdown.find('.ossn-wall-share-menu').attr('hidden', 'hidden').css({
+				position: '',
+				width: '',
+				minWidth: '',
+				maxWidth: '',
+				left: '',
+				right: '',
+				top: '',
+				bottom: '',
+				transform: ''
+			});
+		});
 		$('.ossn-wall-repost-dropdown.is-open').removeClass('is-open')
 			.find('.ossn-wall-repost-toggle').attr('aria-expanded', 'false')
 			.end().find('.ossn-wall-repost-menu').attr('hidden', 'hidden');
+	}
+
+	function positionShareMenu($dropdown) {
+		if (window.innerWidth > 991) {
+			return;
+		}
+
+		var menu = $dropdown.find('.ossn-wall-share-menu')[0];
+		var toggle = $dropdown.find('.ossn-wall-share-toggle')[0];
+		if (!menu || !toggle) {
+			return;
+		}
+
+		var padding = 8;
+		var menuWidth = Math.min(360, Math.max(0, window.innerWidth - (padding * 2)));
+		var toggleRect = toggle.getBoundingClientRect();
+		var $menu = $(menu);
+
+		/* Make the menu independent from the wall card's width and overflow rules. */
+		$menu.css({
+			position: 'fixed',
+			width: menuWidth + 'px',
+			minWidth: '0',
+			maxWidth: 'none',
+			left: '0px',
+			right: 'auto',
+			top: '0px',
+			bottom: 'auto',
+			transform: 'none'
+		});
+
+		var menuHeight = $menu.outerHeight();
+		var top = toggleRect.top - menuHeight - 6;
+		var maxTop = window.innerHeight - menuHeight - padding;
+		if (top < padding) {
+			top = toggleRect.bottom + 6;
+		}
+		if (maxTop < padding) {
+			maxTop = padding;
+		}
+		top = Math.max(padding, Math.min(top, maxTop));
+
+		var left = toggleRect.left + (toggleRect.width / 2) - (menuWidth / 2);
+		left = Math.max(padding, Math.min(left, window.innerWidth - menuWidth - padding));
+		$menu.css({
+			left: left + 'px',
+			top: top + 'px'
+		});
 	}
 
 	function ensureDropdown($toggle) {
@@ -108,6 +169,7 @@
 			$dropdown.addClass('is-open');
 			$toggle.attr('aria-expanded', 'true');
 			$dropdown.find('.ossn-wall-share-menu').removeAttr('hidden');
+			positionShareMenu($dropdown);
 		}
 	});
 
@@ -129,5 +191,11 @@
 
 	$(document).on('click', function () {
 		closeMenus();
+	});
+
+	$(window).on('resize orientationchange scroll', function () {
+		$('.ossn-wall-share-dropdown.is-open').each(function () {
+			positionShareMenu($(this));
+		});
 	});
 })(jQuery);

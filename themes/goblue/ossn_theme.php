@@ -858,6 +858,202 @@ body .ossn-message-box .control .controls .btn {
 		bottom: calc(var(--sibcore-mobile-footer-height, 30px) + var(--sibcore-mobile-chat-gap, 0px) + 28px) !important;
 	}
 }
+
+/* Final narrow-screen overflow guard. All topbar popups share one viewport-safe
+ * surface so messages, notifications, friend requests and account links cannot
+ * be clipped by their desktop trigger position. */
+@media (max-width: 991px) {
+	html,
+	body {
+		max-width: 100%;
+		overflow-x: hidden;
+	}
+
+	.topbar .dropdown-menu,
+	.topbar #notificationBox .ossn-notifications-box,
+	.topbar .ossn-notifications-box {
+		box-sizing: border-box;
+		position: fixed !important;
+		top: 48px !important;
+		left: max(8px, env(safe-area-inset-left)) !important;
+		right: max(8px, env(safe-area-inset-right)) !important;
+		bottom: auto !important;
+		width: auto !important;
+		min-width: 0 !important;
+		max-width: none !important;
+		max-height: calc(100dvh - 56px) !important;
+		margin: 0 !important;
+		transform: none !important;
+		z-index: 1205 !important;
+		overflow-x: hidden !important;
+		overflow-y: auto !important;
+		-webkit-overflow-scrolling: touch;
+	}
+
+	/* Undo the legacy global mobile dropdown offset for the topbar only. */
+	.topbar .dropdown-menu {
+		padding: 4px 0;
+	}
+
+	/* Notification rows must shrink instead of preserving desktop column widths. */
+	.topbar .ossn-notifications-box .notfi-meta,
+	.topbar .ossn-notifications-all .notfi-meta {
+		box-sizing: border-box;
+		width: auto !important;
+		min-width: 0;
+		max-width: none;
+		margin-left: 0;
+		float: none !important;
+	}
+
+	.topbar .ossn-notification-messages .user-item-inner {
+		display: flex;
+		align-items: flex-start;
+		gap: 8px;
+		min-width: 0;
+	}
+
+	.topbar .ossn-notification-messages .user-item .image {
+		flex: 0 0 50px;
+		width: 50px;
+		float: none;
+	}
+
+	.topbar .ossn-notification-messages .user-item .data {
+		flex: 1 1 auto;
+		width: auto !important;
+		min-width: 0;
+		float: none !important;
+		overflow: hidden;
+	}
+
+	.topbar .ossn-notification-messages .user-item .data .name,
+	.topbar .ossn-notification-messages .reply-text,
+	.topbar .ossn-notification-messages .reply-text-from {
+		box-sizing: border-box;
+		width: auto !important;
+		max-width: 100%;
+		margin-left: 0;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.topbar .ossn-notification-messages .user-item-inner .time {
+		float: none;
+		display: block;
+		margin: 0;
+		white-space: nowrap;
+	}
+
+	.topbar .notification-friends li {
+		width: 100%;
+		min-width: 0;
+	}
+
+	.topbar .notification-friends .ossn-notifications-friends-inner {
+		box-sizing: border-box;
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		min-width: 0;
+	}
+
+	.topbar .notification-friends .image {
+		flex: 0 0 50px;
+		width: 50px;
+		float: none;
+	}
+
+	.topbar .notification-friends .notfi-meta {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		flex: 1 1 auto;
+	}
+
+	.topbar .notification-friends .notfi-meta > .user {
+		flex: 1 1 auto;
+		min-width: 0;
+		width: auto !important;
+		max-width: 100%;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	.topbar .notification-friends .controls {
+		display: flex;
+		align-items: center;
+		flex: 0 0 auto;
+		gap: 4px;
+		margin: 0;
+		float: none;
+	}
+
+	.topbar .notification-friends .controls form {
+		display: block;
+	}
+
+	.topbar .notification-friends .controls .btn {
+		max-width: 100%;
+		padding: 3px 6px;
+		white-space: nowrap;
+	}
+
+	/* Other fixed dialogs and media viewers also stay within the visual viewport. */
+	body .ossn-message-box {
+		box-sizing: border-box;
+		width: min(470px, calc(100vw - 16px)) !important;
+		min-width: 0 !important;
+		max-width: calc(100vw - 16px);
+		max-height: calc(100dvh - 16px);
+	}
+
+	.ossn-page-container img,
+	.ossn-page-container video,
+	.ossn-page-container iframe,
+	.ossn-page-container embed,
+	.ossn-page-container object {
+		max-width: 100%;
+	}
+
+	.ossn-page-container input,
+	.ossn-page-container select,
+	.ossn-page-container textarea {
+		box-sizing: border-box;
+		max-width: 100%;
+	}
+
+	.ossn-page-container .ossn-wall-item,
+	.ossn-page-container .ossn-wall-container,
+	.ossn-page-container .ossn-widget,
+	.ossn-page-container .ossn-layout-module,
+	.ossn-page-container .ossn-page-contents {
+		min-width: 0;
+		max-width: 100%;
+	}
+
+	.ossn-page-container .ossn-wall-item,
+	.ossn-page-container .ossn-widget,
+	.ossn-page-container .ossn-layout-module {
+		overflow-wrap: anywhere;
+	}
+}
+
+@media (max-width: 480px) {
+	.topbar .ossn-notifications-box .metadata,
+	.topbar .ossn-notifications-box .messages-inner,
+	.topbar .ossn-notifications-box .notification-friends {
+		max-width: 100%;
+		min-width: 0;
+	}
+
+	/* The popup keeps a readable two-column share grid even at 320 CSS pixels. */
+	.ossn-wall-item .ossn-wall-share-menu {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		max-height: min(70dvh, 420px);
+	}
+}
 </style>
 HTML;
 }
