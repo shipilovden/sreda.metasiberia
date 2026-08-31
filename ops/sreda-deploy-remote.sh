@@ -116,6 +116,26 @@ validate_ossn_cache() {
     fi
 }
 
+ensure_smtp_component_registered() {
+    local registration_output=''
+
+    if ! registration_output=$(cd "$APP" && /usr/bin/php -r '
+define("OSSN_ALLOW_SYSTEM_START", true);
+require_once "system/start.php";
+$components = new OssnComponents();
+$installed = $components->getComponents();
+if (!is_array($installed) || !in_array("SMTP", $installed, true)) {
+    if (!$components->newCom("SMTP")) {
+        fwrite(STDERR, "SMTP component registration failed.\n");
+        exit(1);
+    }
+}
+' 2>&1); then
+        printf '%s\n' "$registration_output" >&2
+        return 1
+    fi
+}
+
 sudo -v
 
 STAMP=$(date +%Y%m%d-%H%M%S)
@@ -234,6 +254,7 @@ if ! refresh_ossn_cache; then
     die 'Не удалось безопасно пересоздать OSSN cache.'
 fi
 validate_ossn_cache || die 'OSSN cache не прошёл обязательную проверку.'
+ensure_smtp_component_registered || die 'Не удалось зарегистрировать SMTP-компонент в OSSN.'
 
 for service in apache2 caddy mysql; do
     sudo systemctl is-active --quiet "$service" || die "Сервис не active: $service"
