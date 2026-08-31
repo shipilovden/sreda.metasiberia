@@ -38,6 +38,20 @@ $ru = array(
 		'repost:quote:hint' => 'Добавьте свой текст к этой записи.',
 		'repost:quote:success' => 'Цитата опубликована в вашей ленте.',
 		'repost:quote:error' => 'Не удалось опубликовать цитату. Попробуйте позже.',
+		'share:post' => 'Поделиться',
+		'share:telegram' => 'Telegram',
+		'share:whatsapp' => 'WhatsApp',
+		'share:vk' => 'ВКонтакте',
+		'share:ok' => 'Одноклассники',
+		'share:facebook' => 'Facebook',
+		'share:x' => 'X',
+		'share:linkedin' => 'LinkedIn',
+		'share:reddit' => 'Reddit',
+		'share:pinterest' => 'Pinterest',
+		'share:email' => 'Электронная почта',
+		'share:copy' => 'Скопировать ссылку',
+		'share:copied' => 'Ссылка скопирована',
+		'share:copy:error' => 'Не удалось скопировать ссылку',
 
 );
 ossn_register_languages('ru', $ru);

@@ -40,8 +40,11 @@ function ossn_wall() {
 		//css and js
 		ossn_extend_view('css/ossn.default', 'css/wall');
 		ossn_extend_view('js/ossn.site', 'js/ossn_wall');
+		ossn_extend_view('ossn/site/head', 'ossn_wall_post_meta');
 		ossn_new_js('ossn.repost', 'js/ossn_repost');
 		ossn_load_js('ossn.repost');
+		ossn_new_js('ossn.share', 'js/ossn_share');
+		ossn_load_js('ossn.share');
 
 		ossn_new_external_js('jquery.tokeninput', 'vendors/jquery/jquery.tokeninput.js');
 
@@ -336,6 +339,8 @@ function ossn_post_page($pages) {
 								}
 						}
 				}
+				global $ossn_wall_share_post;
+				$ossn_wall_share_post = $post;
 				$params['post'] = $post;
 
 				$contents = array(
@@ -618,7 +623,8 @@ function ossn_wall_repost_toggle($post) {
 				return '';
 		}
 		$guid = (int) $post->guid;
-		return '<a href="javascript:void(0);" class="post-control-repost ossn-wall-post-repost ossn-wall-repost-toggle" data-guid="' . $guid . '" aria-haspopup="true" aria-expanded="false" aria-label="' . htmlspecialchars(ossn_print('repost:post'), ENT_QUOTES, 'UTF-8') . '">' . ossn_goblue_lucide_icon('repeat-2') . '<span>' . ossn_print('repost:post') . '</span></a>';
+		$label = ossn_print('repost:post');
+		return '<a href="javascript:void(0);" class="post-control-repost ossn-wall-post-repost ossn-wall-repost-toggle" data-guid="' . $guid . '" aria-haspopup="true" aria-expanded="false" aria-label="' . htmlspecialchars($label, ENT_QUOTES, 'UTF-8') . '" title="' . htmlspecialchars($label, ENT_QUOTES, 'UTF-8') . '">' . ossn_goblue_lucide_icon('repeat-2') . '<span>' . $label . '</span></a>';
 }
 
 /**
@@ -655,6 +661,159 @@ function ossn_wall_repost_button($post) {
 }
 
 /**
+ * Resolve the publication represented by a wall item for sharing metadata.
+ * A repost keeps its own URL, but its visible text and image come from the
+ * original publication.
+ *
+ * @param object $post Wall publication.
+ *
+ * @return object|false
+ */
+function ossn_wall_share_source_post($post) {
+		if(!$post) {
+				return false;
+		}
+		if(!empty($post->repost_guid)) {
+				$source = (new OssnWall())->GetPost((int) $post->repost_guid);
+				if($source && ossn_wall_repost_source_visible($source)) {
+						return $source;
+				}
+		}
+		return $post;
+}
+
+/**
+ * Convert post content to safe plain text for share services and metadata.
+ *
+ * @param string $text Post content.
+ *
+ * @return string
+ */
+function ossn_wall_share_plain_text($text) {
+		if(!is_string($text) || $text === '') {
+				return '';
+		}
+		$text = html_entity_decode(strip_tags($text), ENT_QUOTES, 'UTF-8');
+		$text = preg_replace('/\\s+/u', ' ', $text);
+		return trim($text);
+}
+
+/**
+ * Build the canonical data used by the Share menu and post metadata.
+ *
+ * @param object $post Wall publication.
+ *
+ * @return array
+ */
+function ossn_wall_share_data($post) {
+		$source = ossn_wall_share_source_post($post);
+		$guid   = (int) $post->guid;
+		$site   = (string) ossn_site_settings('site_name');
+		$author = $post->poster_guid ? ossn_user_by_guid($post->poster_guid) : false;
+		$title  = $site;
+		$texts  = array();
+
+		if($source !== $post && !empty($post->description)) {
+				$texts[] = ossn_wall_share_plain_text($post->description);
+		}
+		if($source && !empty($source->description)) {
+				$texts[] = ossn_wall_share_plain_text($source->description);
+		}
+		$texts = array_values(array_unique(array_filter($texts)));
+
+		if($author && !empty($author->fullname)) {
+				$title = $author->fullname . ' — ' . $site;
+		}
+		return array(
+				'url'   => ossn_site_url("post/view/{$guid}"),
+				'title' => $title,
+				'text'  => implode("\n\n", $texts),
+				'image' => $source ? ossn_wall_repost_source_image($source) : '',
+		);
+}
+
+/**
+ * Add Open Graph and Twitter metadata to a direct post page.
+ * Social networks use these tags to build a preview with the post text and
+ * image while the canonical URL still points to the exact publication.
+ *
+ * @return string
+ */
+function ossn_wall_post_meta() {
+		global $ossn_wall_share_post;
+		if(empty($ossn_wall_share_post) || empty($ossn_wall_share_post->guid)) {
+				return '';
+		}
+
+		$data        = ossn_wall_share_data($ossn_wall_share_post);
+		$description = $data['text'];
+		if($description === '') {
+				$description = $data['title'];
+		}
+		if(function_exists('mb_substr')) {
+				$description = mb_substr($description, 0, 300, 'UTF-8');
+		} else {
+				$description = substr($description, 0, 300);
+		}
+		$escape = function($value) {
+				return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
+		};
+
+		$tags = array(
+				'<meta name="description" content="' . $escape($description) . '" />',
+				'<link rel="canonical" href="' . $escape($data['url']) . '" />',
+				'<meta property="og:title" content="' . $escape($data['title']) . '" />',
+				'<meta property="og:description" content="' . $escape($description) . '" />',
+				'<meta property="og:type" content="article" />',
+				'<meta property="og:url" content="' . $escape($data['url']) . '" />',
+				'<meta property="og:site_name" content="' . $escape(ossn_site_settings('site_name')) . '" />',
+				'<meta name="twitter:card" content="' . ($data['image'] ? 'summary_large_image' : 'summary') . '" />',
+				'<meta name="twitter:title" content="' . $escape($data['title']) . '" />',
+				'<meta name="twitter:description" content="' . $escape($description) . '" />',
+		);
+		if(!empty($data['image'])) {
+				$tags[] = '<meta property="og:image" content="' . $escape($data['image']) . '" />';
+				$tags[] = '<meta property="og:image:alt" content="' . $escape($data['title']) . '" />';
+				$tags[] = '<meta name="twitter:image" content="' . $escape($data['image']) . '" />';
+		}
+		return "\n" . implode("\n", $tags) . "\n";
+}
+
+/**
+ * Render the Share toggle used in a wall action row.
+ *
+ * The menu itself is created by the delegated client-side handler so that
+ * dynamically loaded wall items receive the same share options.
+ *
+ * @param object $post Wall publication.
+ *
+ * @return string
+ */
+function ossn_wall_share_toggle($post) {
+		if(!ossn_isLoggedin() || !$post || empty($post->guid)) {
+				return '';
+		}
+		$share_data = ossn_wall_share_data($post);
+		$label      = ossn_print('share:post');
+		return '<a href="javascript:void(0);" class="post-control-share ossn-wall-post-share ossn-wall-share-toggle ossn-wall-share-icon-only" data-share-url="' . htmlspecialchars($share_data['url'], ENT_QUOTES, 'UTF-8') . '" data-share-title="' . htmlspecialchars($share_data['title'], ENT_QUOTES, 'UTF-8') . '" data-share-text="' . htmlspecialchars($share_data['text'], ENT_QUOTES, 'UTF-8') . '" data-share-image="' . htmlspecialchars($share_data['image'], ENT_QUOTES, 'UTF-8') . '" aria-haspopup="true" aria-expanded="false" aria-label="' . htmlspecialchars($label, ENT_QUOTES, 'UTF-8') . '" title="' . htmlspecialchars($label, ENT_QUOTES, 'UTF-8') . '">' . ossn_goblue_lucide_icon('share-2') . '</a>';
+}
+
+/**
+ * Render a Share action with its client-side menu container.
+ *
+ * @param object $post Wall publication.
+ *
+ * @return string
+ */
+function ossn_wall_share_button($post) {
+		$toggle = ossn_wall_share_toggle($post);
+		if(empty($toggle)) {
+				return '';
+		}
+		return '<div class="ossn-wall-share-dropdown">' . $toggle . '</div>';
+}
+
+/**
  * Render one existing postextra menu item without relying on its registration
  * priority. This keeps the action row order stable for every wall item.
  *
@@ -672,12 +831,20 @@ function ossn_wall_render_post_menu_link($link) {
 				$class .= ' ' . $link['class'];
 		}
 		$link['class'] = $class;
+		$labels = array(
+				'like'    => ossn_print('ossn:like'),
+				'comment' => ossn_print('comment:comment'),
+		);
+		if(isset($labels[$name])) {
+				$link['title']      = $labels[$name];
+				$link['aria-label'] = $labels[$name];
+		}
 		unset($link['name'], $link['priority']);
 		return '<li>' . ossn_plugin_view('output/url', $link) . '</li>';
 }
 
 /**
- * Render the common wall action row in the order Like, Comment, Repost.
+ * Render the common wall action row in the order Like, Comment, Repost, Share.
  *
  * @param object $post Wall publication.
  *
@@ -709,6 +876,11 @@ function ossn_wall_render_post_actions($post) {
 		if($repost) {
 				$html .= '<li class="ossn-wall-repost-action-item">' . $repost . '</li>';
 		}
+
+		$share = ossn_wall_share_button($post);
+		if($share) {
+				$html .= '<li class="ossn-wall-share-action-item">' . $share . '</li>';
+		}
 		return $html;
 }
 
@@ -716,8 +888,8 @@ function ossn_wall_render_post_actions($post) {
  * Render the entity action row in the same order as a regular wall post.
  *
  * Profile, cover and album updates use entityextra instead of postextra.
- * Keep the existing entity handlers, but render their three common actions
- * in one predictable order and attach the same repost menu.
+ * Keep the existing entity handlers, but render their common actions in one
+ * predictable order and attach the same repost/share controls.
  *
  * @return string
  */
@@ -730,14 +902,14 @@ function ossn_wall_render_entity_actions() {
 		$items = array();
 		foreach($Ossn->menu['entityextra'] as $menu) {
 				foreach($menu as $link) {
-						if(!empty($link['name']) && in_array($link['name'], array('like', 'comment', 'repost'), true)) {
+						if(!empty($link['name']) && in_array($link['name'], array('like', 'comment', 'repost', 'share'), true)) {
 							$items[$link['name']] = $link;
 						}
 				}
 		}
 
 		$html = '';
-		foreach(array('like', 'comment', 'repost') as $name) {
+		foreach(array('like', 'comment', 'repost', 'share') as $name) {
 				if(!isset($items[$name])) {
 						continue;
 				}
@@ -747,11 +919,24 @@ function ossn_wall_render_entity_actions() {
 						$class .= ' ' . $link['class'];
 				}
 				$link['class'] = $class;
+				$labels = array(
+						'like'    => ossn_print('ossn:like'),
+						'comment' => ossn_print('comment:comment'),
+						'repost'  => ossn_print('repost:post'),
+						'share'   => ossn_print('share:post'),
+				);
+				if(isset($labels[$name])) {
+						$link['title']      = $labels[$name];
+						$link['aria-label'] = $labels[$name];
+				}
 				unset($link['name'], $link['priority']);
 
 				$action = ossn_plugin_view('output/url', $link);
 				if($name === 'repost' && !empty($link['data-guid'])) {
 						$action = '<div class="ossn-wall-repost-dropdown">' . $action . ossn_wall_repost_menu_markup($link['data-guid']) . '</div>';
+				}
+				if($name === 'share') {
+						$action = '<div class="ossn-wall-share-dropdown">' . $action . '</div>';
 				}
 				$html .= '<li>' . $action . '</li>';
 		}
@@ -766,6 +951,7 @@ function ossn_wall_render_entity_actions() {
  * @return void
  */
 function ossn_wall_register_repost_entity_menu($post) {
+		ossn_wall_register_share_entity_menu($post);
 		ossn_unregister_menu('repost', 'entityextra');
 		if(!ossn_isLoggedin() || !$post || empty($post->guid) || !ossn_wall_repost_source_visible($post)) {
 				return;
@@ -778,6 +964,34 @@ function ossn_wall_register_repost_entity_menu($post) {
 				'data-guid' => $guid,
 				'priority'  => 210,
 				'text'      => ossn_goblue_lucide_icon('repeat-2') . '<span>' . ossn_print('repost:post') . '</span>',
+		));
+}
+
+/**
+ * Register a Share action in the entity menu used by special wall templates.
+ *
+ * @param object $post Wall publication.
+ *
+ * @return void
+ */
+function ossn_wall_register_share_entity_menu($post) {
+		ossn_unregister_menu('share', 'entityextra');
+		if(!ossn_isLoggedin() || !$post || empty($post->guid)) {
+				return;
+		}
+		$share_data = ossn_wall_share_data($post);
+		ossn_register_menu_item('entityextra', array(
+				'name'           => 'share',
+				'class'          => 'ossn-wall-post-share ossn-wall-share-toggle ossn-wall-share-icon-only',
+				'href'           => 'javascript:void(0);',
+				'data-share-url' => $share_data['url'],
+				'data-share-title' => $share_data['title'],
+				'data-share-text' => $share_data['text'],
+				'data-share-image' => $share_data['image'],
+				'title'          => ossn_print('share:post'),
+				'aria-label'     => ossn_print('share:post'),
+				'priority'       => 220,
+				'text'           => ossn_goblue_lucide_icon('share-2'),
 		));
 }
 

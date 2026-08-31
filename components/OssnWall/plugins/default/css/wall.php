@@ -367,6 +367,185 @@
 	pointer-events: none;
 }
 
+.ossn-wall-item .post-control-share {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+}
+
+.ossn-wall-item .post-control-share::before {
+	display: none !important;
+	content: none !important;
+}
+
+.ossn-wall-item .menu-likes-comments-share > li a.post-control-share::before,
+.ossn-wall-item .menu-likes-comments-share > li a.ossn-wall-share-toggle::before,
+.ossn-wall-item .ossn-wall-share-toggle::before {
+	display: none !important;
+	content: none !important;
+}
+
+.ossn-wall-item .ossn-wall-share-icon-only {
+	gap: 0;
+}
+
+/* Keep all wall actions as equal icon-only controls. */
+.ossn-wall-item .menu-likes-comments-share > li {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.ossn-wall-item .menu-likes-comments-share > li > a,
+.ossn-wall-item .menu-likes-comments-share > li > .ossn-wall-repost-dropdown,
+.ossn-wall-item .menu-likes-comments-share > li > .ossn-wall-share-dropdown {
+	display: flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	width: 40px !important;
+	height: 40px !important;
+	margin: 0 auto !important;
+	gap: 0 !important;
+}
+
+.ossn-wall-item .menu-likes-comments-share > li > .ossn-wall-repost-dropdown > a,
+.ossn-wall-item .menu-likes-comments-share > li > .ossn-wall-share-dropdown > a {
+	display: flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	width: 40px !important;
+	height: 40px !important;
+	gap: 0 !important;
+}
+
+.ossn-wall-item .menu-likes-comments-share > li > a.post-control-like,
+.ossn-wall-item .menu-likes-comments-share > li > a.post-control-comment,
+.ossn-wall-item .menu-likes-comments-share > li > .ossn-wall-repost-dropdown > a,
+.ossn-wall-item .menu-likes-comments-share > li > .ossn-wall-share-dropdown > a,
+.ossn-wall-item .menu-likes-comments-share > li > a.entity-menu-extra-like,
+.ossn-wall-item .menu-likes-comments-share > li > a.entity-menu-extra-comment,
+.ossn-wall-item .menu-likes-comments-share > li > a.entity-menu-extra-repost,
+.ossn-wall-item .menu-likes-comments-share > li > a.entity-menu-extra-share {
+	font-size: 0 !important;
+}
+
+.ossn-wall-item .menu-likes-comments-share > li a.post-control-like > span,
+.ossn-wall-item .menu-likes-comments-share > li a.post-control-comment > span,
+.ossn-wall-item .menu-likes-comments-share > li a.post-control-repost > span,
+.ossn-wall-item .menu-likes-comments-share > li a.entity-menu-extra-like > span,
+.ossn-wall-item .menu-likes-comments-share > li a.entity-menu-extra-comment > span,
+.ossn-wall-item .menu-likes-comments-share > li a.entity-menu-extra-repost > span {
+	display: none !important;
+}
+
+.ossn-wall-item .menu-likes-comments-share > li a.post-control-like::before,
+.ossn-wall-item .menu-likes-comments-share > li a.post-control-comment::before,
+.ossn-wall-item .menu-likes-comments-share > li a.entity-menu-extra-like::before,
+.ossn-wall-item .menu-likes-comments-share > li a.entity-menu-extra-comment::before {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 18px;
+	height: 18px;
+	margin: 0 !important;
+	font-size: 18px;
+	line-height: 1 !important;
+}
+
+.ossn-wall-item .menu-likes-comments-share > li .post-control-repost .ossn-lucide-icon,
+.ossn-wall-item .menu-likes-comments-share > li .entity-menu-extra-repost .ossn-lucide-icon {
+	width: 18px;
+	height: 18px;
+	margin: 0;
+}
+
+.ossn-wall-item .menu-likes-comments-share > li .post-control-share .ossn-lucide-icon,
+.ossn-wall-item .menu-likes-comments-share > li .entity-menu-extra-share .ossn-lucide-icon {
+	width: 16px;
+	height: 16px;
+	margin: 0;
+}
+
+.ossn-wall-item .post-control-share .ossn-lucide-icon {
+	width: 1.35em;
+	height: 1.35em;
+	vertical-align: -0.2em;
+}
+
+.ossn-wall-item .ossn-wall-share-dropdown {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	height: 40px;
+	z-index: 10;
+}
+
+.ossn-wall-item .ossn-wall-share-menu {
+	display: none;
+	position: absolute;
+	left: 50%;
+	bottom: calc(100% + 6px);
+	transform: translateX(-50%);
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	width: min(360px, calc(100vw - 24px));
+	min-width: min(300px, calc(100vw - 24px));
+	padding: 4px;
+	background: #fff;
+	border: 1px solid #d6dce5;
+	box-shadow: 0 5px 18px rgba(15, 23, 42, 0.2);
+	z-index: 100;
+}
+
+.ossn-wall-item .ossn-wall-share-menu[hidden] {
+	display: none !important;
+}
+
+.ossn-wall-item .ossn-wall-share-dropdown.is-open .ossn-wall-share-menu {
+	display: grid;
+}
+
+.ossn-wall-item .ossn-wall-share-menu a {
+	display: flex !important;
+	align-items: center !important;
+	justify-content: flex-start !important;
+	gap: 8px !important;
+	width: auto !important;
+	height: auto !important;
+	min-height: 36px;
+	padding: 8px 10px !important;
+	color: #27364a !important;
+	font-size: 13px;
+	font-weight: 600;
+	white-space: normal;
+	line-height: 1.2;
+	text-align: left;
+}
+
+.ossn-wall-item .ossn-wall-share-menu a::before {
+	display: none !important;
+	content: none !important;
+}
+
+.ossn-wall-item .ossn-wall-share-menu a:hover {
+	background: #eef3f8 !important;
+}
+
+.ossn-wall-item .ossn-wall-share-menu-icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 18px;
+	flex: 0 0 18px;
+	font-size: 16px;
+	color: #27364a;
+}
+
+.ossn-wall-item .menu-likes-comments-share > .ossn-wall-share-dropdown {
+	flex: 1;
+}
+
 /* Repost menu: one predictable action in every wall row, with two real modes. */
 .ossn-wall-item .ossn-wall-repost-dropdown {
 	position: relative;
