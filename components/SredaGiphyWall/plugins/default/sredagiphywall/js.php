@@ -719,12 +719,28 @@
 	});
 
 	/* OSSN rejects an empty wall post. A GIF-only post is still a valid post,
-	 * so submit one whitespace character; OssnWall trims it before saving. */
+	 * so provide an invisible marker before OssnWall extracts the editor text.
+	 * The core wall handler runs from <body>; a direct button handler runs first. */
 	$(function () {
 		var $wallForm = $('#ossn-wall-form');
 		if (!$wallForm.length) {
 			return;
 		}
+		var ensureAttachmentPostText = function () {
+			var $form = $(this).closest('form');
+			var $attachment = $form.find('input[name="sreda_giphy_url"], input[name="sreda_link_preview_url"]').filter(function () {
+				return String($(this).val() || '').trim() !== '';
+			}).first();
+			if (!$attachment.length) {
+				return;
+			}
+			var $editor = $form.find('.ossn-wall-textarea').first();
+			if ($editor.length && $editor.text().trim() === '' && !$editor.find('img').length) {
+				/* U+200B survives JavaScript/PHP trim but has no visual output. */
+				$editor.text('\u200B');
+			}
+		};
+		$wallForm.find('.ossn-wall-post').on('click.sredaGiphyWall', ensureAttachmentPostText);
 		$wallForm.on('submit.sredaGiphyWall', function () {
 			var $form = $(this);
 			var $attachment = $form.find('input[name="sreda_giphy_url"], input[name="sreda_link_preview_url"]').filter(function () {
