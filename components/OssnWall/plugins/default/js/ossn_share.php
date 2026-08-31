@@ -22,11 +22,12 @@
 		var shareText = text || title;
 		var shareMessage = shareText + '\n\n' + url;
 		var encodedText = encodeURIComponent(shareText);
+		var encodedImage = encodeURIComponent(image || '');
 		var emailBody = encodeURIComponent(shareMessage);
 		var items = [
 			{key: 'telegram', label: print('share:telegram', 'Telegram'), icon: 'fa-brands fa-telegram', href: 'https://t.me/share/url?url=' + encodedUrl + '&text=' + encodedText},
 			{key: 'whatsapp', label: print('share:whatsapp', 'WhatsApp'), icon: 'fa-brands fa-whatsapp', href: 'https://api.whatsapp.com/send?text=' + encodeURIComponent(shareMessage)},
-			{key: 'vk', label: print('share:vk', 'ВКонтакте'), icon: 'fa-brands fa-vk', href: 'https://vk.com/share.php?url=' + encodedUrl},
+			{key: 'vk', label: print('share:vk', 'ВКонтакте'), icon: 'fa-brands fa-vk', href: 'https://vk.com/share.php?url=' + encodedUrl + '&title=' + encodedTitle + '&description=' + encodedText + '&image=' + encodedImage + '&noparse=true'},
 			{key: 'ok', label: print('share:ok', 'Одноклассники'), icon: 'fa-brands fa-odnoklassniki', href: 'https://connect.ok.ru/offer?url=' + encodedUrl},
 			{key: 'facebook', label: print('share:facebook', 'Facebook'), icon: 'fa-brands fa-facebook', href: 'https://www.facebook.com/sharer/sharer.php?u=' + encodedUrl},
 			{key: 'x', label: print('share:x', 'X'), icon: 'fa-brands fa-x-twitter', href: 'https://twitter.com/intent/tweet?url=' + encodedUrl + '&text=' + encodedText},
