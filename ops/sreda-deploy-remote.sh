@@ -177,6 +177,7 @@ tar -xf "$ARCHIVE" -C "$STAGE"
 
 manifest_count=0
 while IFS= read -r line || [[ -n "$line" ]]; do
+    line=${line%$'\r'}
     [[ "$line" =~ ^([0-9a-fA-F]{64})[[:space:]][[:space:]](.+)$ ]] || die 'Некорректная строка SHA256 manifest.'
     expected_hash=${BASH_REMATCH[1],,}
     relative_path=${BASH_REMATCH[2]}
@@ -212,6 +213,7 @@ is_runtime_excluded() {
 }
 
 while IFS= read -r line || [[ -n "$line" ]]; do
+    line=${line%$'\r'}
     [[ "$line" =~ ^([0-9a-fA-F]{64})[[:space:]][[:space:]](.+)$ ]] || die 'Некорректная строка SHA256 manifest при runtime-проверке.'
     expected_hash=${BASH_REMATCH[1],,}
     relative_path=${BASH_REMATCH[2]}
