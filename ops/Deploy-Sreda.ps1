@@ -35,6 +35,20 @@ function Invoke-Checked {
     return $output
 }
 
+function Invoke-InteractiveChecked {
+    param(
+        [Parameter(Mandatory = $true)][string]$FilePath,
+        [Parameter(Mandatory = $false)][string[]]$ArgumentList = @(),
+        [Parameter(Mandatory = $true)][string]$Description
+    )
+
+    & $FilePath @ArgumentList
+    $exitCode = $LASTEXITCODE
+    if ($exitCode -ne 0) {
+        throw "$Description завершилась с кодом $exitCode."
+    }
+}
+
 function Get-RequiredCommand {
     param([Parameter(Mandatory = $true)][string]$Name)
 
@@ -146,7 +160,7 @@ try {
     Invoke-Checked -FilePath $scp -ArgumentList @($remoteHelper, ("{0}:{1}" -f $SshHost, $remoteHelperPath)) -Description 'Загрузка remote helper' | Out-Null
 
     $remoteCommand = "bash '$remoteHelperPath' --archive '$remoteArchive' --manifest '$remoteManifest' --commit '$commit' --public-url '$PublicUrl'"
-    Invoke-Checked -FilePath $ssh -ArgumentList @('-tt', $SshHost, $remoteCommand) -Description 'Выполнение deployment на Ubuntu' | ForEach-Object { Write-Output $_ }
+    Invoke-InteractiveChecked -FilePath $ssh -ArgumentList @('-tt', $SshHost, $remoteCommand) -Description 'Выполнение deployment на Ubuntu'
     Write-Output 'DEPLOYMENT=success'
 }
 finally {
