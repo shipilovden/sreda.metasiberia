@@ -334,12 +334,25 @@
 		$picker.append($header);
 		$picker.append($searchRow);
 		$picker.append($('<div>', {'class': 'sreda-giphy-wall-powered'}).text(labels.powered));
-		$picker.append($('<div>', {'class': 'sreda-giphy-wall-results', 'role': 'list'}));
+		var $results = $('<div>', {'class': 'sreda-giphy-wall-results', 'role': 'list'});
+		$results.on('scroll.sredaGiphyWall', function () {
+			if (this.scrollTop + this.clientHeight >= this.scrollHeight - 96) {
+				loadNextGiphyPage($picker);
+			}
+		});
+		$picker.append($results);
 		$picker.append($('<div>', {
 			'class': 'sreda-giphy-wall-status',
 			hidden: true,
 		}));
 		$composer.append($picker);
+		$picker.data({
+			'sreda-giphy-page': 0,
+			'sreda-giphy-keyword': '',
+			'sreda-giphy-has-more': true,
+			'sreda-giphy-loading': false,
+			'sreda-giphy-seen': {},
+		});
 		return $picker;
 	}
 
@@ -354,14 +367,21 @@
 		}
 	}
 
-	function renderResults($picker, images) {
+	function renderResults($picker, images, append) {
 		var $results = $picker.find('.sreda-giphy-wall-results');
-		$results.empty().removeClass('is-loading');
+		if (!append) {
+			$results.empty();
+		}
+		$results.removeClass('is-loading');
 		setStatus($picker, '', false);
 		if (!images || !images.length) {
-			setStatus($picker, labels.empty, false);
+			if (!append || !$results.children().length) {
+				setStatus($picker, labels.empty, false);
+			}
 			return;
 		}
+		var seen = $picker.data('sreda-giphy-seen') || {};
+		var added = 0;
 		$.each(images, function () {
 			var result = getGiphyResult(this);
 			if (!result) {
@@ -369,6 +389,11 @@
 			}
 			var id = result.id;
 			var url = result.url;
+			if (seen[id]) {
+				return;
+			}
+			seen[id] = true;
+			added++;
 			var $result = $('<button>', {
 				type: 'button',
 				'class': 'sreda-giphy-wall-result',
@@ -385,30 +410,104 @@
 			}));
 			$results.append($result);
 		});
+		$picker.data('sreda-giphy-seen', seen);
 		if (!$results.children().length) {
 			setStatus($picker, labels.error, true);
 		}
+		return added;
 	}
 
-	function searchGiphy($picker, keyword) {
+	function updateGiphyPagination($picker, data, page, added) {
+		var pagination = data && data.pagination ? data.pagination : {};
+		var total = parseInt(pagination.total_count, 10);
+		var offset = parseInt(pagination.offset, 10);
+		var count = parseInt(pagination.count, 10);
+		var hasMore = added > 0;
+		if (!isNaN(total) && !isNaN(offset)) {
+			if (isNaN(count) || count < 1) {
+				count = added;
+			}
+			hasMore = total > (offset + count);
+		} else if (data && data.pagination_code) {
+			hasMore = true;
+		}
+		if (!added) {
+			hasMore = false;
+		}
+		$picker.data({
+			'sreda-giphy-page': page,
+			'sreda-giphy-has-more': hasMore,
+		});
+	}
+
+	function maybeLoadNextGiphyPage($picker) {
+		var results = $picker.find('.sreda-giphy-wall-results')[0];
+		if (!results || !$picker.data('sreda-giphy-has-more')) {
+			return;
+		}
+		if (results.scrollHeight <= results.clientHeight + 8) {
+			setTimeout(function () {
+				loadNextGiphyPage($picker);
+			}, 0);
+		}
+	}
+
+	function loadNextGiphyPage($picker) {
+		if (!$picker.hasClass('is-open')
+			|| $picker.data('sreda-giphy-loading')
+			|| !$picker.data('sreda-giphy-has-more')) {
+			return;
+		}
+		var keyword = String($picker.data('sreda-giphy-keyword') || '');
+		var currentPage = parseInt($picker.data('sreda-giphy-page'), 10) || 1;
+		searchGiphy($picker, keyword, currentPage + 1, true);
+	}
+
+	function startGiphySearch($picker, keyword) {
+		var query = String(keyword || '').trim();
+		$picker.data({
+			'sreda-giphy-page': 0,
+			'sreda-giphy-keyword': query,
+			'sreda-giphy-has-more': true,
+			'sreda-giphy-seen': {},
+		});
+		searchGiphy($picker, query, 1, false);
+	}
+
+	function searchGiphy($picker, keyword, page, append) {
 		var current = $picker.data('sreda-giphy-xhr');
 		if (current && current.readyState !== 4) {
 			current.abort();
 		}
 		var $results = $picker.find('.sreda-giphy-wall-results');
-		$results.addClass('is-loading').empty();
+		$results.addClass('is-loading');
+		if (!append) {
+			$results.empty();
+		}
 		setStatus($picker, labels.loading, false);
 		var query = String(keyword || '').trim();
+		var requestPage = parseInt(page, 10) || 1;
+		var requestToken = (parseInt($picker.data('sreda-giphy-request-token'), 10) || 0) + 1;
+		$picker.data({
+			'sreda-giphy-loading': true,
+			'sreda-giphy-request-token': requestToken,
+			'sreda-giphy-keyword': query,
+		});
 		if (!window.Ossn || typeof Ossn.PostRequest !== 'function') {
 			$results.removeClass('is-loading');
+			$picker.data('sreda-giphy-loading', false);
 			setStatus($picker, labels.error, true);
 			return;
 		}
 		var request = Ossn.PostRequest({
 			/* Use the exact action consumed by the working comment picker. */
-			url: Ossn.site_url + 'action/giphy/search?keyword=' + encodeURIComponent(query),
+			url: Ossn.site_url + 'action/giphy/search?keyword=' + encodeURIComponent(query) + '&offset_giphy=' + requestPage,
 			callback: function (data) {
+				if (requestToken !== $picker.data('sreda-giphy-request-token')) {
+					return;
+				}
 				$results.removeClass('is-loading');
+				$picker.data('sreda-giphy-loading', false);
 				if (typeof data === 'string') {
 					try {
 						data = JSON.parse(data);
@@ -421,15 +520,33 @@
 				/* Some OSSN builds append a second JSON envelope to an action
 				 * response. The image list is the authoritative success signal. */
 				if (data && data.images && typeof data.images.length !== 'undefined') {
-					renderResults($picker, data.images || []);
+					var added = renderResults($picker, data.images || [], !!append);
+					updateGiphyPagination($picker, data, requestPage, added);
+					if (added || $results.children().length) {
+						setStatus($picker, '', false);
+					}
+					maybeLoadNextGiphyPage($picker);
 				} else if (isSuccessfulGiphyResponse(data)) {
-					renderResults($picker, data.images || []);
+					var fallbackAdded = renderResults($picker, data.images || [], !!append);
+					updateGiphyPagination($picker, data, requestPage, fallbackAdded);
+					if (fallbackAdded || $results.children().length) {
+						setStatus($picker, '', false);
+					}
+					maybeLoadNextGiphyPage($picker);
 				} else {
+					$picker.data('sreda-giphy-has-more', false);
 					setStatus($picker, labels.error, true);
 				}
 			},
 			error: function () {
+				if (requestToken !== $picker.data('sreda-giphy-request-token')) {
+					return;
+				}
 				$results.removeClass('is-loading');
+				$picker.data({
+					'sreda-giphy-loading': false,
+					'sreda-giphy-has-more': false,
+				});
 				setStatus($picker, labels.error, true);
 			},
 		});
@@ -552,7 +669,7 @@
 			positionPicker($composer, $picker);
 			if (!$picker.data('sreda-giphy-loaded')) {
 				$picker.data('sreda-giphy-loaded', true);
-				searchGiphy($picker, '');
+				startGiphySearch($picker, '');
 			}
 		}
 	});
@@ -567,13 +684,13 @@
 
 	$(document).on('click', '.sreda-giphy-wall-search-submit', function () {
 		var $picker = $(this).closest('.sreda-giphy-wall-picker');
-		searchGiphy($picker, $picker.find('.sreda-giphy-wall-search').val());
+		startGiphySearch($picker, $picker.find('.sreda-giphy-wall-search').val());
 	});
 
 	$(document).on('keydown', '.sreda-giphy-wall-search', function (event) {
 		if (event.key === 'Enter') {
 			event.preventDefault();
-			searchGiphy($(this).closest('.sreda-giphy-wall-picker'), $(this).val());
+			startGiphySearch($(this).closest('.sreda-giphy-wall-picker'), $(this).val());
 		}
 	});
 
@@ -581,7 +698,7 @@
 		var $input = $(this);
 		clearTimeout(searchDelay);
 		searchDelay = setTimeout(function () {
-			searchGiphy($input.closest('.sreda-giphy-wall-picker'), $input.val());
+			startGiphySearch($input.closest('.sreda-giphy-wall-picker'), $input.val());
 		}, 350);
 	});
 
