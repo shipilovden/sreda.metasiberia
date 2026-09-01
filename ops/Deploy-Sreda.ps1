@@ -90,7 +90,10 @@ $shortCommit = (Invoke-Checked -FilePath $git -ArgumentList @('-C', $repoRoot, '
 
 $phpCommand = Get-Command php -ErrorAction SilentlyContinue
 $changedFiles = @(Invoke-Checked -FilePath $git -ArgumentList @('-C', $repoRoot, 'diff-tree', '--root', '--no-commit-id', '--name-only', '-r', 'HEAD') -Description 'Определение файлов deploy commit' | ForEach-Object { $_.ToString().Trim() } | Where-Object { $_ })
-$changedPhpFiles = @($changedFiles | Where-Object { $_ -match '(?i)\.php$' })
+$changedPhpFiles = @($changedFiles | Where-Object {
+        $_ -match '(?i)\.php$' -and
+        (Test-Path -LiteralPath (Join-Path $repoRoot ($_ -replace '/', '\')) -PathType Leaf)
+})
 if (-not $SkipLint -and $changedPhpFiles.Count -gt 0) {
     if ($null -eq $phpCommand) {
         throw "Для проверки PHP-файлов не найден php в PATH. Установи/добавь PHP или повтори с -SkipLint после осознанной проверки."
