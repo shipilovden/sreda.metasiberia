@@ -126,6 +126,13 @@ function ossn_goblue_get_custom_logos_bgs_setting() {
 }
 function ossn_goblue_head() {
 		$head = array();
+		$seoTitle       = 'SREDA';
+		$seoDescription = 'Connect. Share. Belong.';
+		$seoSiteUrl     = rtrim(ossn_site_url(), '/') . '/';
+		$seoImageUrl    = ossn_site_url('sreda_opengraf.png');
+		$seoEscape      = static function ($value) {
+			return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
+		};
 
 		$head[] = ossn_html_css(array(
 				'href' => ossn_theme_url() . 'vendors/fontawesome/6.7.2/css/all.min.css',
@@ -133,6 +140,22 @@ function ossn_goblue_head() {
 		$head[] = ossn_html_js(array(
 				'src' => ossn_theme_url() . 'vendors/bootstrap/js/bootstrap.min.js?v5.3.8',
 		));
+		$head[] = '<meta name="description" content="' . $seoEscape($seoDescription) . '" />';
+		$head[] = '<link rel="canonical" href="' . $seoEscape($seoSiteUrl) . '" />';
+		$head[] = '<meta property="og:type" content="website" />';
+		$head[] = '<meta property="og:site_name" content="SREDA" />';
+		$head[] = '<meta property="og:locale" content="ru_RU" />';
+		$head[] = '<meta property="og:title" content="' . $seoEscape($seoTitle) . '" />';
+		$head[] = '<meta property="og:description" content="' . $seoEscape($seoDescription) . '" />';
+		$head[] = '<meta property="og:url" content="' . $seoEscape($seoSiteUrl) . '" />';
+		$head[] = '<meta property="og:image" content="' . $seoEscape($seoImageUrl) . '" />';
+		$head[] = '<meta property="og:image:secure_url" content="' . $seoEscape($seoImageUrl) . '" />';
+		$head[] = '<meta property="og:image:type" content="image/png" />';
+		$head[] = '<meta property="og:image:alt" content="SREDA" />';
+		$head[] = '<meta name="twitter:card" content="summary_large_image" />';
+		$head[] = '<meta name="twitter:title" content="' . $seoEscape($seoTitle) . '" />';
+		$head[] = '<meta name="twitter:description" content="' . $seoEscape($seoDescription) . '" />';
+		$head[] = '<meta name="twitter:image" content="' . $seoEscape($seoImageUrl) . '" />';
 		return implode('', $head);
 }
 /**

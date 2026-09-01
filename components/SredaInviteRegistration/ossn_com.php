@@ -15,7 +15,6 @@ function sreda_invite_registration_init() {
 		// hidden value is added to it when the visitor came through an invite.
 		ossn_extend_view('forms/signup/before/submit', 'sredainvite/signup');
 		ossn_extend_view('ossn/site/head', 'sredainvite/referrer');
-		ossn_extend_view('ossn/site/head', 'sredainvite/seo');
 		ossn_extend_view('css/ossn.default', 'css/sreda_invite');
 
 		ossn_new_js('sreda.invite.registration', 'js/sreda_invite');
