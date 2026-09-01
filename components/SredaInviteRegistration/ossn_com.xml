@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component xmlns="http://www.opensource-socialnetwork.org/v/3.0">
+    <name>SREDA Invite Registration</name>
+    <id>SredaInviteRegistration</id>
+    <author>SREDA</author>
+    <description>One-time administrator invitations and invite-only registration.</description>
+    <license>Open Source Social Network License (OSSN LICENSE)</license>
+    <author_url>https://metasiberia.com/</author_url>
+    <license_url>https://www.opensource-socialnetwork.org/licence/</license_url>
+    <version>1.0</version>
+    <requires>
+        <type>ossn_version</type>
+        <version>9.6</version>
+    </requires>
+    <requires>
+        <type>ossn_component</type>
+        <name>OssnWall</name>
+        <version>9.7</version>
+    </requires>
+</component>

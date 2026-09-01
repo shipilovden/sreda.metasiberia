@@ -37,6 +37,8 @@ error_log
 !/components/OssnPostBackground
 !/components/OssnGiphy
 !/components/OssnLocation
+!/components/SredaInviteRegistration/
+!/components/SredaInviteRegistration/**
 
 #do not ignore config files
 !/.scrutinizer.yml
