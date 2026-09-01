@@ -1,4 +1,5 @@
 User-agent: *
+Allow: /
 Disallow: /cache/
 Disallow: /actions/
 Disallow: /classes/
@@ -7,4 +8,9 @@ Disallow: /installation/
 Disallow: /locale/
 Disallow: /system/
 Disallow: /upgrade/
+Disallow: /administrator/
+Disallow: /action/
+Disallow: /ajax/
+Disallow: /*?
 
+Sitemap: https://sreda.metasiberia.com/sitemap.xml

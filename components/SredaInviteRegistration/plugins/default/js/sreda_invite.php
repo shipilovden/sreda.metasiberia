@@ -34,7 +34,14 @@
 			title: escapeHtml(data.invite_error_title || print('sreda:invite:registration:title', 'SREDA')),
 			content: '<p class="sreda-invite-registration-error">' + escapeHtml(message) + '</p>'
 		});
+		var $messageBox = $('.ossn-message-box');
+		$messageBox.addClass('sreda-invite-registration-modal');
+		$messageBox.find('.control .btn-default').text(print('sreda:invite:registration:acknowledge', 'Понятно'));
 	}
+
+	$(document).on('click.sredaInviteRegistrationModal', '.ossn-message-box.sreda-invite-registration-modal .close-box, .ossn-message-box.sreda-invite-registration-modal .control .btn-default', function () {
+		$(this).closest('.ossn-message-box').removeClass('sreda-invite-registration-modal');
+	});
 
 	function removeInviteTokenFromAddressBar() {
 		var signupForm = document.getElementById('ossn-home-signup');

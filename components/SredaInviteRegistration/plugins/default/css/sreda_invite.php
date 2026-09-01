@@ -157,7 +157,55 @@
 	line-height: 1.5;
 }
 
+/* Match the invite-only notice to the registration form and keep the change
+   scoped to this modal instead of changing OSSN's shared message boxes. */
+.ossn-message-box.sreda-invite-registration-modal {
+	box-sizing: border-box;
+	width: calc(100% - 24px);
+	max-width: 470px;
+}
+
+.ossn-message-box.sreda-invite-registration-modal .title {
+	background: #1e293b !important;
+	border-bottom: 0 !important;
+	color: #fff !important;
+}
+
+.ossn-message-box.sreda-invite-registration-modal .title .close-box {
+	color: #fff !important;
+	opacity: 0.8;
+}
+
+.ossn-message-box.sreda-invite-registration-modal .contents {
+	background: #fff;
+	color: #27364a;
+}
+
+.ossn-message-box.sreda-invite-registration-modal .control {
+	background: #1e293b !important;
+	border-top: 0 !important;
+}
+
+.ossn-message-box.sreda-invite-registration-modal .control .controls .btn-default {
+	background: #fff !important;
+	border-color: #fff !important;
+	color: #1e293b !important;
+	font-weight: 600;
+}
+
+.ossn-message-box.sreda-invite-registration-modal .control .controls .btn-default:hover,
+.ossn-message-box.sreda-invite-registration-modal .control .controls .btn-default:focus {
+	background: #f1f5f9 !important;
+	border-color: #f1f5f9 !important;
+	color: #1e293b !important;
+}
+
 @media (max-width: 480px) {
+	.ossn-message-box.sreda-invite-registration-modal {
+		margin-top: 24px;
+		width: calc(100% - 16px);
+	}
+
 	.sreda-invite-link-row {
 		flex-direction: column;
 	}
