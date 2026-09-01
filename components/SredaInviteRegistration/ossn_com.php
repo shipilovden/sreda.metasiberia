@@ -40,6 +40,9 @@ function sreda_invite_registration_init() {
 				));
 
 				ossn_register_action('sreda/invite/create', SREDA_INVITE_REGISTRATION . 'actions/admin/invite/create.php');
+				ossn_register_action('sreda/invite/resend', SREDA_INVITE_REGISTRATION . 'actions/admin/invite/resend.php');
+				ossn_register_action('sreda/invite/revoke', SREDA_INVITE_REGISTRATION . 'actions/admin/invite/revoke.php');
+				ossn_register_action('sreda/invite/rotate', SREDA_INVITE_REGISTRATION . 'actions/admin/invite/rotate.php');
 				ossn_register_action('sreda/invite/settings', SREDA_INVITE_REGISTRATION . 'actions/admin/invite/settings.php');
 		}
 }
@@ -67,16 +70,24 @@ function sreda_invite_registration_page_handler($pages, $handler) {
 				return;
 		}
 
-		$admin  = ossn_loggedin_user();
-		$invite = SredaInvite::getOrCreateForAdmin($admin->guid);
-		if(!$invite) {
+		$admin = ossn_loggedin_user();
+		$invites = SredaInvite::listForAdmin($admin->guid);
+		if($invites === false) {
 			echo '<div class="title">' . htmlspecialchars(ossn_print('sreda:invite:title'), ENT_QUOTES, 'UTF-8') . '</div>';
 			echo '<div class="contents"><div class="ossn-box-inner"><p>' . htmlspecialchars(ossn_print('sreda:invite:error'), ENT_QUOTES, 'UTF-8') . '</p></div></div>';
 				return;
 		}
+		$current = false;
+		foreach($invites as $item) {
+				if(!empty($item['invite_url']) && in_array($item['status'], array('active', 'reserved'), true)) {
+						$current = $item;
+						break;
+				}
+		}
 
 		echo ossn_plugin_view('sredainvite/dialog', array(
-				'invite'     => $invite,
+				'invite'     => $current,
+				'invites'    => $invites,
 				'invite_only' => SredaInvite::isInviteOnlyEnabled(),
 		));
 }
@@ -93,6 +104,10 @@ function sreda_invite_registration_page_handler($pages, $handler) {
 function sreda_invite_registration_create_started($hook, $type, $returnValue, $params) {
 		if(!empty($GLOBALS['sreda_invite_registration_reservation'])) {
 				$GLOBALS['sreda_invite_registration_create_started'] = true;
+				if(!SredaInvite::beginRegistrationReservation($GLOBALS['sreda_invite_registration_reservation'])) {
+						return false;
+				}
+				$GLOBALS['sreda_invite_registration_transaction'] = true;
 		}
 		return $returnValue;
 }
@@ -110,6 +125,11 @@ function sreda_invite_registration_finalize() {
 		$createStarted = !empty($GLOBALS['sreda_invite_registration_create_started']);
 		$created       = !empty($GLOBALS['sreda_invite_registration_created']);
 		$release       = false;
+
+		if(!empty($GLOBALS['sreda_invite_registration_transaction'])) {
+				SredaInvite::rollbackRegistrationReservation();
+				$GLOBALS['sreda_invite_registration_transaction'] = false;
+		}
 
 		if($bufferLevel && ob_get_level() >= $bufferLevel) {
 				$contents = ob_get_contents();
@@ -146,8 +166,19 @@ function sreda_invite_registration_user_created($callback, $type, $params) {
 		}
 		$consumed = SredaInvite::consume($GLOBALS['sreda_invite_registration_reservation'], $params['guid']);
 		if($consumed) {
-				$GLOBALS['sreda_invite_registration_created'] = true;
+				$committed = empty($GLOBALS['sreda_invite_registration_transaction'])
+						|| SredaInvite::commitRegistrationReservation();
+				$GLOBALS['sreda_invite_registration_transaction'] = false;
+				if($committed) {
+						$GLOBALS['sreda_invite_registration_created'] = true;
+				} else {
+						error_log('SREDA invite registration transaction was not committed.');
+				}
 		} else {
+				if(!empty($GLOBALS['sreda_invite_registration_transaction'])) {
+						SredaInvite::rollbackRegistrationReservation();
+						$GLOBALS['sreda_invite_registration_transaction'] = false;
+				}
 				error_log('SREDA invite was not marked used after successful user creation.');
 		}
 }

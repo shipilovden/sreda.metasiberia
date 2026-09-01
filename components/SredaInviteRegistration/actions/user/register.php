@@ -8,21 +8,26 @@ require_once SREDA_INVITE_REGISTRATION . 'classes/SredaInvite.php';
  * @param string $code
  * @return void
  */
-function sreda_invite_registration_error($code) {
+function sreda_invite_registration_error($code, $invitedEmail = '') {
 		$messages = array(
 				'required'  => ossn_print('sreda:invite:registration:required'),
 				'invalid'   => ossn_print('sreda:invite:registration:invalid'),
 				'used'      => ossn_print('sreda:invite:registration:used'),
 				'reserved'  => ossn_print('sreda:invite:registration:reserved'),
 		);
-		$message = isset($messages[$code]) ? $messages[$code] : $messages['invalid'];
+		if($code === 'email_mismatch') {
+				$message = ossn_print('sreda:invite:registration:email:mismatch', array(SredaInvite::maskEmail($invitedEmail)));
+		} else {
+				$message = isset($messages[$code]) ? $messages[$code] : $messages['invalid'];
+		}
+		$publicCode = $code === 'email_mismatch' ? 'invite_email_mismatch' : $code;
 		header('Content-Type: application/json; charset=UTF-8');
 		echo json_encode(array(
 				'dataerr'             => $message,
 				'invite_error'        => true,
-				'invite_error_code'   => $code,
+				'invite_error_code'   => $publicCode,
 				'invite_error_message' => $message,
-				'invite_error_title'  => ossn_print('sreda:invite:registration:title'),
+				'invite_error_title'  => $code === 'email_mismatch' ? ossn_print('sreda:invite:registration:email:title') : ossn_print('sreda:invite:registration:title'),
 		), JSON_UNESCAPED_UNICODE);
 		exit;
 }
@@ -33,9 +38,10 @@ if(SredaInvite::isInviteOnlyEnabled()) {
 		if(empty($token)) {
 				sreda_invite_registration_error('required');
 		}
-		$reservation = SredaInvite::reserve($token);
+		$email = input('email', true);
+		$reservation = SredaInvite::reserve($token, $email);
 		if(empty($reservation['ok'])) {
-				sreda_invite_registration_error($reservation['error']);
+				sreda_invite_registration_error($reservation['error'], isset($reservation['invited_email']) ? $reservation['invited_email'] : '');
 		}
 
 		$GLOBALS['sreda_invite_registration_reservation'] = $reservation;
